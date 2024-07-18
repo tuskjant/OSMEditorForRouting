@@ -1,0 +1,47 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=OSM Editor for Routing
+qgisMinimumVersion=3.0
+description=This plugin allow to edit OSM layer for routing purpouses
+version=0.1
+author=Gemma Riu
+email=gemmariup@gmail.com
+
+about=This plugin allows editing an OSM layer to modify the attributes used in the creation of the graph for routing.
+
+tracker=https://github.com/tuskjant/OSMEditorForRouting/issues
+repository=https://github.com/tuskjant/OSMEditorForRouting
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=osm, routing
+
+homepage=https://github.com/tuskjant/OSMEditorForRouting
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+
