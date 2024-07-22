@@ -82,7 +82,6 @@ class EditorForRouting:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('EditorForRouting', message)
 
-
     def add_action(
         self,
         icon_path,
@@ -170,7 +169,6 @@ class EditorForRouting:
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -178,7 +176,6 @@ class EditorForRouting:
                 self.tr(u'&OSM Editor for Routing'),
                 action)
             self.iface.removeToolBarIcon(action)
-
 
     def run(self):
         """Run method that performs all the real work"""
@@ -188,6 +185,7 @@ class EditorForRouting:
         if self.first_start == True:
             self.first_start = False
             self.dlg = EditorForRoutingDialog()
+            self.dlg.pushButtonHello.clicked.connect(self.hello_world)
 
         # show the dialog
         self.dlg.show()
@@ -198,3 +196,7 @@ class EditorForRouting:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
+    def hello_world(self):
+        print("Hello world!")
+        self.iface.messageBar().pushMessage("Success", "Hello world!")
