@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>110</y>
+     <y>30</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -42,7 +42,24 @@
     <string>Hello World</string>
    </property>
   </widget>
+  <widget class="QgsMapLayerComboBox" name="mMapLayerComboBox">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>80</y>
+     <width>160</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

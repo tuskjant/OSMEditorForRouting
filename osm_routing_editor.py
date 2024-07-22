@@ -186,6 +186,7 @@ class EditorForRouting:
             self.first_start = False
             self.dlg = EditorForRoutingDialog()
             self.dlg.pushButtonHello.clicked.connect(self.hello_world)
+            self.dlg.mMapLayerComboBox.layerChanged.connect(self.layer_selected)
 
         # show the dialog
         self.dlg.show()
@@ -200,3 +201,9 @@ class EditorForRouting:
     def hello_world(self):
         print("Hello world!")
         self.iface.messageBar().pushMessage("Success", "Hello world!")
+
+    def layer_selected(self):
+        print("capa seleccionada")
+        current_layer = self.dlg.mMapLayerComboBox.currentLayer()
+        print(current_layer.name())
+        print(type(current_layer))
