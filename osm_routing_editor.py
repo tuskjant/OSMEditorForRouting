@@ -30,6 +30,7 @@ from .resources import *
 # Import the code for the dialog
 from .osm_routing_editor_dialog import EditorForRoutingDialog
 import os.path
+from .select_feature_tool import SelectFeatureTool
 
 
 class EditorForRouting:
@@ -58,6 +59,8 @@ class EditorForRouting:
             self.translator = QTranslator()
             self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
+
+        self.canvas = iface.mapCanvas()
 
         # Declare instance attributes
         self.actions = []
@@ -187,6 +190,7 @@ class EditorForRouting:
             self.dlg = EditorForRoutingDialog()
             self.dlg.pushButtonHello.clicked.connect(self.hello_world)
             self.dlg.mMapLayerComboBox.layerChanged.connect(self.layer_selected)
+            self.dlg.pushButtonSelectTram.clicked.connect(self.select_feature)
 
         # show the dialog
         self.dlg.show()
@@ -207,3 +211,11 @@ class EditorForRouting:
         current_layer = self.dlg.mMapLayerComboBox.currentLayer()
         print(current_layer.name())
         print(type(current_layer))
+
+    def select_feature(self):
+        current_layer = self.dlg.mMapLayerComboBox.currentLayer()
+        if current_layer is not None:
+            self.tool = SelectFeatureTool(self.canvas, current_layer)
+            self.canvas.setMapTool(self.tool)
+        else:
+            self.iface.messageBar().pushMessage("Error", "No layer selected", level=3)
