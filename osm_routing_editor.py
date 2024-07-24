@@ -188,9 +188,9 @@ class EditorForRouting:
         if self.first_start == True:
             self.first_start = False
             self.dlg = EditorForRoutingDialog()
-            self.dlg.pushButtonHello.clicked.connect(self.hello_world)
-            self.dlg.mMapLayerComboBox.layerChanged.connect(self.layer_selected)
-            self.dlg.pushButtonSelectTram.clicked.connect(self.select_feature)
+            #self.dlg.pushButtonHello.clicked.connect(self.hello_world)
+            #self.dlg.mMapLayerComboBox.layerChanged.connect(self.layer_selected)
+            #self.dlg.pushButtonSelectTram.clicked.connect(self.select_feature)
 
         # show the dialog
         self.dlg.show()
@@ -202,20 +202,3 @@ class EditorForRouting:
             # substitute with your code.
             pass
 
-    def hello_world(self):
-        print("Hello world!")
-        self.iface.messageBar().pushMessage("Success", "Hello world!")
-
-    def layer_selected(self):
-        print("capa seleccionada")
-        current_layer = self.dlg.mMapLayerComboBox.currentLayer()
-        print(current_layer.name())
-        print(type(current_layer))
-
-    def select_feature(self):
-        current_layer = self.dlg.mMapLayerComboBox.currentLayer()
-        if current_layer is not None:
-            self.tool = SelectFeatureTool(self.canvas, current_layer)
-            self.canvas.setMapTool(self.tool)
-        else:
-            self.iface.messageBar().pushMessage("Error", "No layer selected", level=3)
