@@ -33,13 +33,13 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>20</y>
-       <width>141</width>
+       <y>120</y>
+       <width>91</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
-      <string>Selecciona tram</string>
+      <string>Select road</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -49,26 +49,65 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>60</y>
-       <width>93</width>
+       <y>160</y>
+       <width>121</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
-      <string>Activa tram</string>
+      <string>Activate segments</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonDesactiva">
      <property name="geometry">
       <rect>
-       <x>130</x>
-       <y>60</y>
+       <x>180</x>
+       <y>160</y>
+       <width>141</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Deactivate segments</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonAddLayers">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
        <width>93</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
-      <string>Desactiva tram</string>
+      <string>Add layers</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonToPbf">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>200</y>
+       <width>131</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Convert to pbf</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonOSRMfiles">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>240</y>
+       <width>141</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Prepare OSRM files</string>
      </property>
     </widget>
    </widget>
