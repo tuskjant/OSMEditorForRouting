@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>467</width>
-    <height>287</height>
+    <width>490</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,8 +18,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>451</width>
-     <height>221</height>
+     <width>471</width>
+     <height>351</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -32,8 +32,8 @@
     <widget class="QPushButton" name="pushButtonSelectTram">
      <property name="geometry">
       <rect>
-       <x>140</x>
-       <y>30</y>
+       <x>20</x>
+       <y>20</y>
        <width>141</width>
        <height>28</height>
       </rect>
@@ -48,8 +48,8 @@
     <widget class="QPushButton" name="pushButtonActiva">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>100</y>
+       <x>20</x>
+       <y>60</y>
        <width>93</width>
        <height>28</height>
       </rect>
@@ -61,8 +61,8 @@
     <widget class="QPushButton" name="pushButtonDesactiva">
      <property name="geometry">
       <rect>
-       <x>280</x>
-       <y>100</y>
+       <x>130</x>
+       <y>60</y>
        <width>93</width>
        <height>28</height>
       </rect>
@@ -76,34 +76,11 @@
     <attribute name="title">
      <string>Settings</string>
     </attribute>
-    <widget class="QComboBox" name="comboBoxDBCon">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>10</y>
-       <width>201</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>10</y>
-       <width>101</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>DB Connection:</string>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>50</y>
+       <x>40</x>
+       <y>180</y>
        <width>111</width>
        <height>20</height>
       </rect>
@@ -115,8 +92,8 @@
     <widget class="QgsFileWidget" name="mQgsFileWidgetOsmosis">
      <property name="geometry">
       <rect>
-       <x>170</x>
-       <y>50</y>
+       <x>190</x>
+       <y>180</y>
        <width>241</width>
        <height>27</height>
       </rect>
@@ -128,8 +105,8 @@
     <widget class="QgsFileWidget" name="mQgsFileWidget">
      <property name="geometry">
       <rect>
-       <x>170</x>
-       <y>130</y>
+       <x>190</x>
+       <y>280</y>
        <width>241</width>
        <height>27</height>
       </rect>
@@ -141,8 +118,8 @@
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>140</y>
+       <x>40</x>
+       <y>290</y>
        <width>81</width>
        <height>16</height>
       </rect>
@@ -154,8 +131,8 @@
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>80</y>
+       <x>40</x>
+       <y>220</y>
        <width>121</width>
        <height>16</height>
       </rect>
@@ -167,8 +144,8 @@
     <widget class="QgsFileWidget" name="mQgsFileWidget_2">
      <property name="geometry">
       <rect>
-       <x>170</x>
-       <y>80</y>
+       <x>190</x>
+       <y>220</y>
        <width>241</width>
        <height>27</height>
       </rect>
@@ -177,13 +154,164 @@
       <enum>QgsFileWidget::GetDirectory</enum>
      </property>
     </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>451</width>
+       <height>161</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>PostgreSQL connection</string>
+     </property>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Host:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_5">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>70</y>
+        <width>55</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Port:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>110</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Database:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>110</y>
+        <width>55</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Schema:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>30</y>
+        <width>55</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>User:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_9">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>70</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Password:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditHost">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>30</y>
+        <width>141</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditPort">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>70</y>
+        <width>71</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditDB">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>110</y>
+        <width>121</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditUser">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>30</y>
+        <width>171</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditPassword">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>70</y>
+        <width>151</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditSchema">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>110</y>
+        <width>151</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>240</y>
+     <x>140</x>
+     <y>370</y>
      <width>341</width>
      <height>32</height>
     </rect>

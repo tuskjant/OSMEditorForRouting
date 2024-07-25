@@ -24,13 +24,13 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsApplication, QgsConnectionRegistry
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .osm_routing_editor_dialog import EditorForRoutingDialog
 import os.path
-from .select_feature_tool import SelectFeatureTool
 
 
 class EditorForRouting:
@@ -189,8 +189,7 @@ class EditorForRouting:
             self.first_start = False
             self.dlg = EditorForRoutingDialog()
             #self.dlg.pushButtonHello.clicked.connect(self.hello_world)
-            #self.dlg.mMapLayerComboBox.layerChanged.connect(self.layer_selected)
-            #self.dlg.pushButtonSelectTram.clicked.connect(self.select_feature)
+        
 
         # show the dialog
         self.dlg.show()
