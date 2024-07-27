@@ -24,7 +24,8 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsApplication, QgsConnectionRegistry
+from qgis.core import QgsDataSourceUri, QgsVectorLayer, QgsProject, Qgis
+from qgis.gui import QgsMessageBar
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -188,8 +189,7 @@ class EditorForRouting:
         if self.first_start == True:
             self.first_start = False
             self.dlg = EditorForRoutingDialog()
-            #self.dlg.pushButtonHello.clicked.connect(self.hello_world)
-        
+            self.dlg.pushButtonAddLayers.clicked.connect(self.add_layer)
 
         # show the dialog
         self.dlg.show()
@@ -199,5 +199,37 @@ class EditorForRouting:
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
+            print("·hola")
             pass
 
+    def add_layer(self):
+        # get user connection parameters
+        host = self.dlg.lineEditHost.text()
+        port = self.dlg.lineEditPort.text()
+        user = self.dlg.lineEditUser.text()
+        password = self.dlg.lineEditPassword.text()
+        database = self.dlg.lineEditDB.text()
+        schema = self.dlg.lineEditSchema.text()
+
+        # set connection
+        uri = QgsDataSourceUri()
+        uri.setConnection(host, port, database, user, password)
+
+        # fetch ways layer
+        where = "tags ? 'highway' or tags ? 'junction'"
+        uri.setDataSource(schema, "ways", "linestring", where)
+        ways_layer = QgsVectorLayer(uri.uri(), "ways", "postgres")
+
+        #add ways layer
+        if not ways_layer.isValid():
+            self.iface.messageBar().pushMessage("", "Error when retriveing the layer.", Qgis.Warning, 10)
+            return
+        else:
+            QgsProject.instance().addMapLayer(ways_layer)
+            self.iface.setActiveLayer(ways_layer)
+            self.iface.zoomToActiveLayer()
+
+
+
+
+        
