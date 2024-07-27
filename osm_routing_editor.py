@@ -71,6 +71,9 @@ class EditorForRouting:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
 
+        # Load settings
+        self.settings = QSettings('OSMRoutingEditor', 'OSMRE_settings')
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -173,6 +176,10 @@ class EditorForRouting:
         # will be set False in run()
         self.first_start = True
 
+        # create dialog and load settings
+        self.dlg = EditorForRoutingDialog()
+        self.load_settings()
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -188,19 +195,37 @@ class EditorForRouting:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = EditorForRoutingDialog()
             self.dlg.pushButtonAddLayers.clicked.connect(self.add_layer)
 
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
+
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            print("·hola")
             pass
+
+    def load_settings(self):
+        host = self.settings.value('host')
+        print(host)
+        if host is not None:
+            self.dlg.lineEditHost.setText(host)
+        port = self.settings.value('port')
+        print(port)
+        if port is not None:
+            self.dlg.lineEditPort.setText(port)
+        user = self.settings.value('user')
+        if user is not None:
+            self.dlg.lineEditUser.setText(user)
+        db = self.settings.value('database')
+        if db is not None:
+            self.dlg.lineEditDB.setText(db)
+        schema = self.settings.value('schema')
+        if schema is not None:
+            self.dlg.lineEditSchema.setText(schema)
 
     def add_layer(self):
         # get user connection parameters
@@ -211,6 +236,13 @@ class EditorForRouting:
         database = self.dlg.lineEditDB.text()
         schema = self.dlg.lineEditSchema.text()
 
+        # save connection parameters to settings
+        self.settings.setValue('host', host)
+        self.settings.setValue('port', port)
+        self.settings.setValue('user', user)
+        self.settings.setValue('database', database)
+        self.settings.setValue('schema', schema)
+
         # set connection
         uri = QgsDataSourceUri()
         uri.setConnection(host, port, database, user, password)
@@ -220,7 +252,7 @@ class EditorForRouting:
         uri.setDataSource(schema, "ways", "linestring", where)
         ways_layer = QgsVectorLayer(uri.uri(), "ways", "postgres")
 
-        #add ways layer
+        # add ways layer
         if not ways_layer.isValid():
             self.iface.messageBar().pushMessage("", "Error when retriveing the layer.", Qgis.Warning, 10)
             return
@@ -228,8 +260,3 @@ class EditorForRouting:
             QgsProject.instance().addMapLayer(ways_layer)
             self.iface.setActiveLayer(ways_layer)
             self.iface.zoomToActiveLayer()
-
-
-
-
-        
