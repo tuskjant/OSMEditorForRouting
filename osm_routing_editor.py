@@ -24,7 +24,7 @@
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsDataSourceUri, QgsVectorLayer, QgsProject, Qgis
+from qgis.core import QgsDataSourceUri, QgsVectorLayer, QgsProject, Qgis, QgsMapLayer, QgsWkbTypes
 from qgis.gui import QgsMessageBar
 
 # Initialize Qt resources from file resources.py
@@ -32,6 +32,8 @@ from .resources import *
 # Import the code for the dialog
 from .osm_routing_editor_dialog import EditorForRoutingDialog
 import os.path
+# import tools
+from .select_feature_tool import SelectFeatureTool
 
 
 class EditorForRouting:
@@ -196,6 +198,7 @@ class EditorForRouting:
         if self.first_start == True:
             self.first_start = False
             self.dlg.pushButtonAddLayers.clicked.connect(self.add_layer)
+            self.dlg.pushButtonSelectTram.clicked.connect(self.select_features)
 
         # show the dialog
         self.dlg.show()
@@ -210,11 +213,9 @@ class EditorForRouting:
 
     def load_settings(self):
         host = self.settings.value('host')
-        print(host)
         if host is not None:
             self.dlg.lineEditHost.setText(host)
         port = self.settings.value('port')
-        print(port)
         if port is not None:
             self.dlg.lineEditPort.setText(port)
         user = self.settings.value('user')
@@ -250,13 +251,43 @@ class EditorForRouting:
         # fetch ways layer
         where = "tags ? 'highway' or tags ? 'junction'"
         uri.setDataSource(schema, "ways", "linestring", where)
-        ways_layer = QgsVectorLayer(uri.uri(), "ways", "postgres")
+        self.ways_layer = QgsVectorLayer(uri.uri(), "ways", "postgres")
 
         # add ways layer
-        if not ways_layer.isValid():
-            self.iface.messageBar().pushMessage("", "Error when retriveing the layer.", Qgis.Warning, 10)
+        if not self.ways_layer.isValid():
+            self.iface.messageBar().pushMessage("Error", "Error when retriveing the layer.", Qgis.Warning, 10)
             return
         else:
-            QgsProject.instance().addMapLayer(ways_layer)
-            self.iface.setActiveLayer(ways_layer)
+            QgsProject.instance().addMapLayer(self.ways_layer)
+            self.iface.setActiveLayer(self.ways_layer)
             self.iface.zoomToActiveLayer()
+
+    def select_features(self):
+        # Get layer by name and check if exist
+        self.ways_layer = QgsProject.instance().mapLayersByName("ways")[0]
+        if not self.ways_layer:
+            self.iface.messageBar().pushMessage("Error", "Ways layer is not loaded", Qgis.Warning, 10)
+            return
+
+        # Check layer type, geometry = linestring (2)
+        if(self.ways_layer.type() != QgsMapLayer.VectorLayer or self.ways_layer.wkbType() != 2):
+            self.iface.messageBar().pushMessage("Error", "Ways layer is not valid", Qgis.Warning, 10)
+            return
+
+        # Check layer attributes
+        hasAttribute = False
+        for field in self.ways_layer.fields():
+            if field.name() == "tags":
+                if field.type() == 8: #hstore
+                    hasAttribute = True
+        if not hasAttribute:
+            self.iface.messageBar().pushMessage("Error", "Ways layer is not valid. Missing tags attribute", Qgis.Warning, 10)
+            return
+
+        # Select features from ways layer
+        current_layer = self.ways_layer
+        if current_layer is not None:
+            self.tool = SelectFeatureTool(self.canvas, current_layer)
+            self.canvas.setMapTool(self.tool)
+        else:
+            self.iface.messageBar().pushMessage("Error", "No layer selected", Qgis.Warning, 10)
