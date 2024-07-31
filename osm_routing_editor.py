@@ -38,6 +38,8 @@ from .select_feature_tool import SelectFeatureTool
 
 class EditorForRouting:
     """QGIS Plugin Implementation."""
+    segment_layer_name = "ways"
+    tags_field_name = "tags"
 
     def __init__(self, iface):
         """Constructor.
@@ -199,7 +201,7 @@ class EditorForRouting:
             self.first_start = False
             self.dlg.pushButtonAddLayers.clicked.connect(self.add_layer)
             self.dlg.pushButtonSelectTram.clicked.connect(self.select_features)
-            self.dlg.pushButtonActiva.clicked.connect(self.activate_segments)
+            self.dlg.pushButtonActiva.clicked.connect(self.allow_segment_access)
 
         # show the dialog
         self.dlg.show()
@@ -265,17 +267,17 @@ class EditorForRouting:
 
     def select_features(self):
         # Get layer by name and check if exist
-        current_layer = self.check_layer("ways")
+        ways_layer = self.check_layer(self.segment_layer_name)
 
         # Select features from ways layer
-        if current_layer is not None:
-            self.tool = SelectFeatureTool(self.canvas, current_layer)
+        if ways_layer is not None:
+            self.tool = SelectFeatureTool(self.canvas, ways_layer)
             self.canvas.setMapTool(self.tool)
         else:
             self.iface.messageBar().pushMessage("Error", "No layer available", Qgis.Warning, 10)
 
     # Check layer exist in type and format defined
-    def check_layer(self, layer_name):
+    def get_layer(self, layer_name):
         # Get layer by name and check if exist
         layers = QgsProject.instance().mapLayersByName(layer_name)
         if len(layers) < 1:
@@ -311,5 +313,43 @@ class EditorForRouting:
             return
         return ways_layer
 
-    def activate_segments(self):
-        pass
+    def allow_segment_access(self):
+        ways_layer = self.get_layer(self.segment_layer_name)
+        selected_features = ways_layer.selectedFeatures()
+        if len(selected_features) < 1:
+            self.iface.messageBar().pushMessage(
+                "Error", "There are no selected features", Qgis.Warning, 10
+            )
+            return
+        ways_layer.startEditing()
+
+        for feature in selected_features:
+            tags_value = feature[self.tags_field_name]
+            if tags_value:
+                new_tags_value = self.edit_access_segments(tags_value, "allow_access")
+                feature[self.tags_field_name] = new_tags_value
+                ways_layer.updateFeature(feature)
+        ways_layer.commitChanges()
+        ways_layer.triggerRepaint()
+
+    def edit_access_segments(self, tags_value, option):
+        #tags_dict = dict(item.split("=>") for item in tags_value.split(", "))
+        tags_dict = tags_value
+        print(tags_dict)
+        print(type(tags_value))
+        # When it has not been edited before:
+        if "osmredited" not in tags_dict.keys():
+            # if access tag exist save value in osmredited
+            if "access" in tags_dict.keys():
+                tags_dict["osmredited"] = tags_dict["access"]
+            # if access tag does not exist mark as no_access_key
+            else:
+                tags_dict["osmredited"] = "No_Access_Key"
+            # if option selected is restrict access -> no, else if allow access ->yes
+            if option == "restrict_access":
+                tags_dict["access"] = "no"
+            elif option == "allow_access":
+                tags_dict["access"] = "yes"
+        # Convert to hstore
+        #tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
+        return tags_dict
