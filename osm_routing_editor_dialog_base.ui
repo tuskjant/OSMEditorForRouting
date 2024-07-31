@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -61,7 +61,7 @@
     <widget class="QPushButton" name="pushButtonDesactiva">
      <property name="geometry">
       <rect>
-       <x>180</x>
+       <x>150</x>
        <y>160</y>
        <width>141</width>
        <height>28</height>
@@ -88,7 +88,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>200</y>
+       <y>240</y>
        <width>131</width>
        <height>28</height>
       </rect>
@@ -101,13 +101,26 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>240</y>
+       <y>280</y>
        <width>141</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
       <string>Prepare OSRM files</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonUndoChanges">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>200</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Undo Changes</string>
      </property>
     </widget>
    </widget>
@@ -331,6 +344,9 @@
         <width>151</width>
         <height>22</height>
        </rect>
+      </property>
+      <property name="inputMask">
+       <string/>
       </property>
      </widget>
      <widget class="QLineEdit" name="lineEditSchema">
