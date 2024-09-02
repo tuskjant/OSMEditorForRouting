@@ -215,6 +215,8 @@ class EditorForRouting:
             pass
 
     def load_settings(self):
+        """ Method to load and set saved parameters (host, port, user, database, schema).
+        """
         host = self.settings.value('host')
         if host is not None:
             self.dlg.lineEditHost.setText(host)
@@ -232,6 +234,8 @@ class EditorForRouting:
             self.dlg.lineEditSchema.setText(schema)
 
     def add_layer(self):
+        """ Method to load ways layer from database
+        """
         # get user connection parameters
         host = self.dlg.lineEditHost.text()
         port = self.dlg.lineEditPort.text()
@@ -266,6 +270,8 @@ class EditorForRouting:
             self.iface.zoomToActiveLayer()
 
     def select_features(self):
+        """Method to activate select feature tool for ways layer if layer is valid
+        """
         # Get layer by name and check if exist
         ways_layer = self.check_layer(self.segment_layer_name)
 
@@ -276,9 +282,10 @@ class EditorForRouting:
         else:
             self.iface.messageBar().pushMessage("Error", "No layer available", Qgis.Warning, 10)
 
-    # Check layer exist in type and format defined
     def get_layer(self, layer_name):
-        # Get layer by name and check if exist
+        """Check if layer exist in type and format defined
+        """
+        # Get layer by name and check if exists
         layers = QgsProject.instance().mapLayersByName(layer_name)
         if len(layers) < 1:
             self.iface.messageBar().pushMessage(
@@ -314,6 +321,8 @@ class EditorForRouting:
         return ways_layer
 
     def allow_segment_access(self):
+        """ Method to edit ways segment to allow segment access
+        """
         ways_layer = self.get_layer(self.segment_layer_name)
         selected_features = ways_layer.selectedFeatures()
         if len(selected_features) < 1:
@@ -333,7 +342,10 @@ class EditorForRouting:
         ways_layer.triggerRepaint()
 
     def edit_access_segments(self, tags_value, option):
-        #tags_dict = dict(item.split("=>") for item in tags_value.split(", "))
+        """Method to modify tags field depending on option. Option can be "allow_access" or 
+        "restrict_access"
+        """
+        # tags_dict = dict(item.split("=>") for item in tags_value.split(", "))
         tags_dict = tags_value
         print(tags_dict)
         print(type(tags_value))
@@ -351,5 +363,5 @@ class EditorForRouting:
             elif option == "allow_access":
                 tags_dict["access"] = "yes"
         # Convert to hstore
-        #tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
+        # tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
         return tags_dict
