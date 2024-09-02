@@ -184,6 +184,7 @@ class EditorForRouting:
         self.dlg = EditorForRoutingDialog()
         self.load_settings()
 
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -191,6 +192,7 @@ class EditorForRouting:
                 self.tr(u'&OSM Editor for Routing'),
                 action)
             self.iface.removeToolBarIcon(action)
+
 
     def run(self):
         """Run method that performs all the real work"""
@@ -201,7 +203,8 @@ class EditorForRouting:
             self.first_start = False
             self.dlg.pushButtonAddLayers.clicked.connect(self.add_layer)
             self.dlg.pushButtonSelectTram.clicked.connect(self.select_features)
-            self.dlg.pushButtonActiva.clicked.connect(self.allow_segment_access)
+            self.dlg.pushButtonActiva.clicked.connect(lambda: self.change_segment_access("allow_access"))
+            self.dlg.pushButtonDesactiva.clicked.connect(lambda: self.change_segment_access("restrict_access"))
 
         # show the dialog
         self.dlg.show()
@@ -213,6 +216,7 @@ class EditorForRouting:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             pass
+
 
     def load_settings(self):
         """ Method to load and set saved parameters (host, port, user, database, schema).
@@ -232,6 +236,7 @@ class EditorForRouting:
         schema = self.settings.value('schema')
         if schema is not None:
             self.dlg.lineEditSchema.setText(schema)
+
 
     def add_layer(self):
         """ Method to load ways layer from database
@@ -269,6 +274,7 @@ class EditorForRouting:
             self.iface.setActiveLayer(self.ways_layer)
             self.iface.zoomToActiveLayer()
 
+
     def select_features(self):
         """Method to activate select feature tool for ways layer if layer is valid
         """
@@ -281,6 +287,7 @@ class EditorForRouting:
             self.canvas.setMapTool(self.tool)
         else:
             self.iface.messageBar().pushMessage("Error", "No layer available", Qgis.Warning, 10)
+
 
     def check_layer(self, layer_name):
         """Check if layer exist in type and format defined
@@ -320,8 +327,9 @@ class EditorForRouting:
             return
         return ways_layer
 
-    def allow_segment_access(self):
-        """ Method to edit ways segment to allow segment access
+
+    def change_segment_access(self, option):
+        """ Method to edit ways segment to allow or restrict segment access
         """
         ways_layer = self.check_layer(self.segment_layer_name)
         selected_features = ways_layer.selectedFeatures()
@@ -335,11 +343,12 @@ class EditorForRouting:
         for feature in selected_features:
             tags_value = feature[self.tags_field_name]
             if tags_value:
-                new_tags_value = self.edit_access_segments(tags_value, "allow_access")
+                new_tags_value = self.edit_access_segments(tags_value, option)
                 feature[self.tags_field_name] = new_tags_value
                 ways_layer.updateFeature(feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
+
 
     def edit_access_segments(self, tags_value, option):
         """Method to modify tags field depending on option. Option can be "allow_access" or 
