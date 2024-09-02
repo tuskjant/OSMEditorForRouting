@@ -282,7 +282,7 @@ class EditorForRouting:
         else:
             self.iface.messageBar().pushMessage("Error", "No layer available", Qgis.Warning, 10)
 
-    def get_layer(self, layer_name):
+    def check_layer(self, layer_name):
         """Check if layer exist in type and format defined
         """
         # Get layer by name and check if exists
@@ -323,7 +323,7 @@ class EditorForRouting:
     def allow_segment_access(self):
         """ Method to edit ways segment to allow segment access
         """
-        ways_layer = self.get_layer(self.segment_layer_name)
+        ways_layer = self.check_layer(self.segment_layer_name)
         selected_features = ways_layer.selectedFeatures()
         if len(selected_features) < 1:
             self.iface.messageBar().pushMessage(
