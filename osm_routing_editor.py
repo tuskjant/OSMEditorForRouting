@@ -343,12 +343,12 @@ class EditorForRouting:
 
     def edit_access_segments(self, tags_value, option):
         """Method to modify tags field depending on option. Option can be "allow_access" or 
-        "restrict_access"
+        "restrict_access". If "allow_access", "access" tag is "yes". If "restrict_access", "access"
+        tag is "no". Before been edited previous state will be stored in osmredited tag.
+        In case segement has been edited before, just change the access state. 
         """
         # tags_dict = dict(item.split("=>") for item in tags_value.split(", "))
         tags_dict = tags_value
-        print(tags_dict)
-        print(type(tags_value))
         # When it has not been edited before:
         if "osmredited" not in tags_dict.keys():
             # if access tag exist save value in osmredited
@@ -358,10 +358,11 @@ class EditorForRouting:
             else:
                 tags_dict["osmredited"] = "No_Access_Key"
             # if option selected is restrict access -> no, else if allow access ->yes
-            if option == "restrict_access":
-                tags_dict["access"] = "no"
-            elif option == "allow_access":
-                tags_dict["access"] = "yes"
-        # Convert to hstore
-        # tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
+        # In any case change state
+        if option == "restrict_access":
+            tags_dict["access"] = "no"
+        elif option == "allow_access":
+            tags_dict["access"] = "yes"
+        # Convert to hstore tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
+        print(tags_dict)
         return tags_dict
