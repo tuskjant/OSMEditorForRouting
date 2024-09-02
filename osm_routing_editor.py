@@ -200,7 +200,7 @@ class EditorForRouting:
         if self.first_start == True:
             self.first_start = False
             self.dlg.pushButtonAddLayers.clicked.connect(self.add_layer)
-            self.dlg.pushButtonSelectTram.clicked.connect(self.select_features)
+            self.dlg.pushButtonSelectTram.toggled.connect(self.handle_feature_selection)
             self.dlg.pushButtonActiva.clicked.connect(lambda: self.change_segment_access("allow_access"))
             self.dlg.pushButtonDesactiva.clicked.connect(lambda: self.change_segment_access("restrict_access"))
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
@@ -271,6 +271,15 @@ class EditorForRouting:
             self.iface.setActiveLayer(self.ways_layer)
             self.iface.zoomToActiveLayer()
 
+    def handle_feature_selection(self, checked):
+        if checked:
+            self.select_features()
+        else:
+            ways_layer = self.check_layer(self.segment_layer_name)
+            if ways_layer is not None:
+                ways_layer.removeSelection()
+            self.iface.actionIdentify().trigger() #activar la herramienta info
+
     def select_features(self):
         """Method to activate select feature tool for ways layer if layer is valid
         """
@@ -334,14 +343,19 @@ class EditorForRouting:
             return
         ways_layer.startEditing()
 
+        edited_segments = 0
         for feature in selected_features:
             tags_value = feature[self.tags_field_name]
             if tags_value:
                 new_tags_value = self.edit_access_segments(tags_value, option)
                 feature[self.tags_field_name] = new_tags_value
                 ways_layer.updateFeature(feature)
+                edited_segments += 1
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
+        self.iface.messageBar().pushMessage(
+            "Info", f"{edited_segments} segments have been edited", Qgis.Info, 10
+        )
 
     def edit_access_segments(self, tags_value, option):
         """Method to modify tags field depending on option. Option can be "allow_access" or 
