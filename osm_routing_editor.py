@@ -40,6 +40,7 @@ class EditorForRouting:
     """QGIS Plugin Implementation."""
     segment_layer_name = "ways"
     tags_field_name = "tags"
+    ways_style_file = "ways_style.qml"
 
     def __init__(self, iface):
         """Constructor.
@@ -270,6 +271,10 @@ class EditorForRouting:
             QgsProject.instance().addMapLayer(self.ways_layer)
             self.iface.setActiveLayer(self.ways_layer)
             self.iface.zoomToActiveLayer()
+            # apply symbology
+            qml_path = os.path.join(os.path.dirname(__file__), self.ways_style_file)
+            self.ways_layer.loadNamedStyle(qml_path)
+            self.ways_layer.triggerRepaint()
 
     def handle_feature_selection(self, checked):
         if checked:
@@ -380,7 +385,6 @@ class EditorForRouting:
         elif option == "allow_access":
             tags_dict["access"] = "yes"
         # Convert to hstore tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
-        print(tags_dict)
         return tags_dict
 
     def undo_segment_changes(self):
