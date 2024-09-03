@@ -34,6 +34,8 @@ from .osm_routing_editor_dialog import EditorForRoutingDialog
 import os.path
 # import tools
 from .select_feature_tool import SelectFeatureTool
+# subprocess to execute cmd commands
+import subprocess
 
 
 class EditorForRouting:
@@ -205,6 +207,7 @@ class EditorForRouting:
             self.dlg.pushButtonActiva.clicked.connect(lambda: self.change_segment_access("allow_access"))
             self.dlg.pushButtonDesactiva.clicked.connect(lambda: self.change_segment_access("restrict_access"))
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
+            self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
 
         # show the dialog
         self.dlg.show()
@@ -220,21 +223,21 @@ class EditorForRouting:
     def load_settings(self):
         """ Method to load and set saved parameters (host, port, user, database, schema).
         """
-        host = self.settings.value('host')
-        if host is not None:
-            self.dlg.lineEditHost.setText(host)
-        port = self.settings.value('port')
-        if port is not None:
-            self.dlg.lineEditPort.setText(port)
-        user = self.settings.value('user')
-        if user is not None:
-            self.dlg.lineEditUser.setText(user)
-        db = self.settings.value('database')
-        if db is not None:
-            self.dlg.lineEditDB.setText(db)
-        schema = self.settings.value('schema')
-        if schema is not None:
-            self.dlg.lineEditSchema.setText(schema)
+        self.host = self.settings.value('host')
+        if self.host is not None:
+            self.dlg.lineEditHost.setText(self.host)
+        self.port = self.settings.value('port')
+        if self.port is not None:
+            self.dlg.lineEditPort.setText(self.port)
+        self.user = self.settings.value('user')
+        if self.user is not None:
+            self.dlg.lineEditUser.setText(self.user)
+        self.db = self.settings.value('database')
+        if self.db is not None:
+            self.dlg.lineEditDB.setText(self.db)
+        self.schema = self.settings.value('schema')
+        if self.schema is not None:
+            self.dlg.lineEditSchema.setText(self.schema)
 
     def add_layer(self):
         """ Method to load ways layer from database
@@ -428,3 +431,28 @@ class EditorForRouting:
         ways_layer.updateFeature(feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
+
+    def run_command(self, command):
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        stdout = stdout.decode('cp1252')
+        stderr = stderr.decode('cp1252')
+        return stdout, stderr
+
+    def convert_to_pbf(self):
+        pbf_folder = self.dlg.mQgsFileWidget_pbfFolder.filePath()
+        osmosis_folder = self.dlg.mQgsFileWidgetOsmosis.filePath()
+        password = self.dlg.lineEditPassword.text()
+        if self.db is not None and self.user is not None and password is not None:
+            try: 
+                command = f'cd /d "{osmosis_folder}" && osmosis --read-pgsql database={self.db} user={self.user} password={password} --dataset-dump --write-pbf file={os.path.join(pbf_folder,"output.osm.pbf")}'
+                stdout, stderr = self.run_command(command)
+                print("Salida", stdout)
+                print("Errores", stderr)
+                self.iface.messageBar().pushMessage(
+                    "Info", "Database converted to pbf file", Qgis.Success, 10
+                )
+            except:
+                self.iface.messageBar().pushMessage(
+                    "Error", "An error ocurred while converting to pbf", Qgis.Warning, 10
+                )

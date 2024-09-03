@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -150,8 +150,11 @@
        <height>27</height>
       </rect>
      </property>
+     <property name="cursor">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
      <property name="storageMode">
-      <enum>QgsFileWidget::GetFile</enum>
+      <enum>QgsFileWidget::GetDirectory</enum>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="mQgsFileWidget">
@@ -193,7 +196,7 @@
       <string>OSM pbf folder:</string>
      </property>
     </widget>
-    <widget class="QgsFileWidget" name="mQgsFileWidget_2">
+    <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFolder">
      <property name="geometry">
       <rect>
        <x>190</x>
