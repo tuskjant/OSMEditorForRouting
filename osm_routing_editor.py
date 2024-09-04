@@ -208,6 +208,7 @@ class EditorForRouting:
             self.dlg.pushButtonDesactiva.clicked.connect(lambda: self.change_segment_access("restrict_access"))
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
+            self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
 
         # show the dialog
         self.dlg.show()
@@ -455,3 +456,7 @@ class EditorForRouting:
                 self.iface.messageBar().pushMessage(
                     "Error", "An error ocurred while converting to pbf", Qgis.Warning, 10
                 )
+    
+    def load_pbf(self):
+        # Comprobar si existe la bbdd y si no existe crearla
+        pass
