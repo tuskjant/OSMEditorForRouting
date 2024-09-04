@@ -22,8 +22,8 @@
  ***************************************************************************/
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
+from qgis.PyQt.QtWidgets import QAction, QTableView
 from qgis.core import QgsDataSourceUri, QgsVectorLayer, QgsProject, Qgis, QgsMapLayer, QgsWkbTypes
 from qgis.gui import QgsMessageBar
 
@@ -298,9 +298,11 @@ class EditorForRouting:
         # Select features from ways layer
         if ways_layer is not None:
             self.tool = SelectFeatureTool(self.canvas, ways_layer)
+            self.tool.feature_selected.connect(self.display_segments)
             self.canvas.setMapTool(self.tool)
         else:
             self.iface.messageBar().pushMessage("Error", "No layer available", Qgis.Warning, 10)
+
 
     def check_layer(self, layer_name):
         """Check if layer exist in type and format defined
@@ -456,7 +458,39 @@ class EditorForRouting:
                 self.iface.messageBar().pushMessage(
                     "Error", "An error ocurred while converting to pbf", Qgis.Warning, 10
                 )
-    
+
     def load_pbf(self):
         # Comprobar si existe la bbdd y si no existe crearla
         pass
+
+    def display_segments(self):
+        self.tableView = self.dlg.tableView
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(['Id', 'Name', 'Highway', 'Access', 'Oneway', 'MaxSpeed', 'Edited'])
+
+        # Get selected features and attributes
+        ways_layer = self.check_layer(self.segment_layer_name)
+        selected_features = ways_layer.selectedFeatures()
+        datos =[]
+        if selected_features:
+            for feature in selected_features:
+                feature_id = f"{feature.id()}"
+                print(feature_id)
+                tags_value = feature[self.tags_field_name]
+                if tags_value:
+                    name = tags_value["name"] if "name" in tags_value.keys() else ""
+                    highway = tags_value["highway"] if "highway" in tags_value.keys() else ""
+                    access = tags_value["access"] if "access" in tags_value.keys() else ""
+                    oneway = tags_value["oneway"] if "oneway" in tags_value.keys() else ""
+                    maxspeed = tags_value["maxspeed"] if "maxspeed" in tags_value.keys() else ""
+                    edited = "yes" if "osmredited" in tags_value.keys() else "no"
+                else:   
+                    name = highway = access = oneway = maxspeed = ""
+                    edited = "no"
+                datos.append([feature_id, name, highway, access, oneway, maxspeed, edited])
+        
+        for fila_datos in datos:
+            items = [QStandardItem(dato) for dato in fila_datos]
+            model.appendRow(items)
+
+        self.tableView.setModel(model)
