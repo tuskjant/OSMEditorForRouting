@@ -23,106 +23,192 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
      <string>OSM Routing editor</string>
     </attribute>
-    <widget class="QPushButton" name="pushButtonSelectTram">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>120</y>
-       <width>91</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Select road</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonActiva">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>160</y>
-       <width>121</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Activate segments</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButtonDesactiva">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>160</y>
-       <width>141</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Deactivate segments</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="pushButtonAddLayers">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>80</y>
+       <y>10</y>
        <width>93</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
-      <string>Add layers</string>
+      <string>Add layer</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonToPbf">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>240</y>
+       <x>280</x>
+       <y>280</y>
        <width>131</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
-      <string>Convert to pbf</string>
+      <string>Export to pbf</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonOSRMfiles">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>30</x>
        <y>280</y>
        <width>141</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
-      <string>Prepare OSRM files</string>
+      <string>Load pbf to database</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButtonUndoChanges">
+    <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>200</y>
-       <width>93</width>
-       <height>28</height>
+       <x>10</x>
+       <y>259</y>
+       <width>441</width>
+       <height>61</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Undo Changes</string>
+     <property name="title">
+      <string>Import export data</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>69</y>
+       <width>441</width>
+       <height>181</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Edit segments</string>
+     </property>
+     <widget class="QPushButton" name="pushButtonUndoChanges">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>150</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Undo Changes</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonDesactiva">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>110</y>
+        <width>121</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Deny access</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonActiva">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>121</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Access permited</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonOneWay">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>70</y>
+        <width>111</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>One way</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonSelectTram">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>91</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Select road</string>
+      </property>
+      <property name="checkable">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_BothDirections">
+      <property name="geometry">
+       <rect>
+        <x>150</x>
+        <y>110</y>
+        <width>111</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Both directions</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinBoxSpeed">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>110</y>
+        <width>71</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>140</number>
+      </property>
+      <property name="singleStep">
+       <number>10</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonMaxSpeed">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>70</y>
+        <width>101</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Speed limit</string>
+      </property>
+     </widget>
+    </widget>
+    <zorder>groupBox_3</zorder>
+    <zorder>groupBox_2</zorder>
+    <zorder>pushButtonAddLayers</zorder>
+    <zorder>pushButtonToPbf</zorder>
+    <zorder>pushButtonOSRMfiles</zorder>
    </widget>
    <widget class="QWidget" name="tab_2">
     <attribute name="title">

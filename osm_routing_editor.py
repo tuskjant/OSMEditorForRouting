@@ -413,7 +413,6 @@ class EditorForRouting:
                     else:
                         tags_value["access"] = tags_value.pop("osmredited")
                 feature[self.tags_field_name] = tags_value
-                print("eidted feature ")
                 ways_layer.updateFeature(feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
