@@ -184,7 +184,7 @@ class EditorForRouting:
         self.first_start = True
 
         # create dialog and load settings
-        self.dlg = EditorForRoutingDialog()
+        self.dlg = EditorForRoutingDialog(routing_editor=self)
         self.load_settings()
 
     def unload(self):
@@ -281,12 +281,14 @@ class EditorForRouting:
             self.ways_layer.triggerRepaint()
 
     def handle_feature_selection(self, checked):
+        """Method to handle checkable button: checked select, unchecked unselect"""
         if checked:
             self.select_features()
         else:
             ways_layer = self.check_layer(self.segment_layer_name)
             if ways_layer is not None:
                 ways_layer.removeSelection()
+            self.display_segments()
             self.iface.actionIdentify().trigger() #activar la herramienta info
 
     def select_features(self):
@@ -302,7 +304,6 @@ class EditorForRouting:
             self.canvas.setMapTool(self.tool)
         else:
             self.iface.messageBar().pushMessage("Error", "No layer available", Qgis.Warning, 10)
-
 
     def check_layer(self, layer_name):
         """Check if layer exist in type and format defined
@@ -367,6 +368,7 @@ class EditorForRouting:
         self.iface.messageBar().pushMessage(
             "Info", f"{edited_segments} segments have been edited", Qgis.Info, 10
         )
+        self.display_segments()
 
     def edit_access_segments(self, tags_value, option):
         """Method to modify tags field depending on option. Option can be "allow_access" or 
@@ -433,8 +435,10 @@ class EditorForRouting:
         ways_layer.updateFeature(feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
+        self.display_segments()
 
     def run_command(self, command):
+        """Method to run a subprocess for pbf generation"""
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         stdout = stdout.decode('cp1252')
@@ -442,6 +446,7 @@ class EditorForRouting:
         return stdout, stderr
 
     def convert_to_pbf(self):
+        """Method for exporting from database to pbf files"""
         pbf_folder = self.dlg.mQgsFileWidget_pbfFolder.filePath()
         osmosis_folder = self.dlg.mQgsFileWidgetOsmosis.filePath()
         password = self.dlg.lineEditPassword.text()
@@ -464,6 +469,7 @@ class EditorForRouting:
         pass
 
     def display_segments(self):
+        """Method to display attributes of selected segments in a table"""
         self.tableView = self.dlg.tableView
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(['Id', 'Name', 'Highway', 'Access', 'Oneway', 'MaxSpeed', 'Edited'])
@@ -488,9 +494,18 @@ class EditorForRouting:
                     name = highway = access = oneway = maxspeed = ""
                     edited = "no"
                 datos.append([feature_id, name, highway, access, oneway, maxspeed, edited])
-        
+
         for fila_datos in datos:
             items = [QStandardItem(dato) for dato in fila_datos]
             model.appendRow(items)
 
         self.tableView.setModel(model)
+
+        self.tableView.setColumnWidth(1, 200)
+
+    def perform_cleanup(self):
+        """Method to unselect all features """
+        ways_layer = self.check_layer(self.segment_layer_name)
+        if ways_layer is not None:
+            ways_layer.removeSelection()
+        self.iface.actionIdentify().trigger() #activar la herramienta info

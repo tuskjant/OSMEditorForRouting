@@ -33,7 +33,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class EditorForRoutingDialog(QtWidgets.QDialog, FORM_CLASS):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, routing_editor=None):
         """Constructor."""
         super(EditorForRoutingDialog, self).__init__(parent)
         # Set up the user interface from Designer through FORM_CLASS.
@@ -42,3 +42,9 @@ class EditorForRoutingDialog(QtWidgets.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.routing_editor = routing_editor
+    
+    def closeEvent(self, event):
+        if self.routing_editor:
+            self.routing_editor.perform_cleanup()
+        event.accept()
