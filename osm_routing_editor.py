@@ -32,11 +32,12 @@ from .resources import *
 # Import the code for the dialog
 from .osm_routing_editor_dialog import EditorForRoutingDialog
 import os.path
-# import tools
+# tool for select feature
 from .select_feature_tool import SelectFeatureTool
 # subprocess to execute cmd commands
 import subprocess
-
+# osrm feature data to edit features
+from .osrm_feature_data import OsrmFeatureData
 
 class EditorForRouting:
     """QGIS Plugin Implementation."""
@@ -244,27 +245,27 @@ class EditorForRouting:
         """ Method to load ways layer from database
         """
         # get user connection parameters
-        host = self.dlg.lineEditHost.text()
-        port = self.dlg.lineEditPort.text()
-        user = self.dlg.lineEditUser.text()
-        password = self.dlg.lineEditPassword.text()
-        database = self.dlg.lineEditDB.text()
-        schema = self.dlg.lineEditSchema.text()
+        self.host = self.dlg.lineEditHost.text()
+        self.port = self.dlg.lineEditPort.text()
+        self.user = self.dlg.lineEditUser.text()
+        self.password = self.dlg.lineEditPassword.text()
+        self.database = self.dlg.lineEditDB.text()
+        self.schema = self.dlg.lineEditSchema.text()
 
         # save connection parameters to settings
-        self.settings.setValue('host', host)
-        self.settings.setValue('port', port)
-        self.settings.setValue('user', user)
-        self.settings.setValue('database', database)
-        self.settings.setValue('schema', schema)
+        self.settings.setValue('host', self.host)
+        self.settings.setValue('port', self.port)
+        self.settings.setValue('user', self.user)
+        self.settings.setValue('database', self.database)
+        self.settings.setValue('schema', self.schema)
 
         # set connection
         uri = QgsDataSourceUri()
-        uri.setConnection(host, port, database, user, password)
+        uri.setConnection(self.host, self.port, self.database, self.user, self.password)
 
         # fetch ways layer
         where = "tags ? 'highway' or tags ? 'junction'"
-        uri.setDataSource(schema, "ways", "linestring", where)
+        uri.setDataSource(self.schema, "ways", "linestring", where)
         self.ways_layer = QgsVectorLayer(uri.uri(), "ways", "postgres")
 
         # add ways layer
@@ -285,11 +286,15 @@ class EditorForRouting:
         if checked:
             self.select_features()
         else:
-            ways_layer = self.check_layer(self.segment_layer_name)
-            if ways_layer is not None:
-                ways_layer.removeSelection()
+            self.perform_cleanup()
             self.display_segments()
-            self.iface.actionIdentify().trigger() #activar la herramienta info
+
+    def perform_cleanup(self):
+        """Method to unselect all features """
+        ways_layer = self.check_layer(self.segment_layer_name)
+        if ways_layer is not None:
+            ways_layer.removeSelection()
+        self.iface.actionIdentify().trigger() #activar la herramienta info
 
     def select_features(self):
         """Method to activate select feature tool for ways layer if layer is valid
@@ -346,7 +351,7 @@ class EditorForRouting:
     def change_segment_access(self, option):
         """ Method to edit ways segment to allow or restrict segment access
         """
-        ways_layer = self.check_layer(self.segment_layer_name)
+        ways_layer = self.check_layer(self.segment_layer_name)        
         selected_features = ways_layer.selectedFeatures()
         if len(selected_features) < 1:
             self.iface.messageBar().pushMessage(
@@ -357,43 +362,16 @@ class EditorForRouting:
 
         edited_segments = 0
         for feature in selected_features:
-            tags_value = feature[self.tags_field_name]
-            if tags_value:
-                new_tags_value = self.edit_access_segments(tags_value, option)
-                feature[self.tags_field_name] = new_tags_value
-                ways_layer.updateFeature(feature)
-                edited_segments += 1
+            osrm_feature = OsrmFeatureData(feature)
+            osrm_feature.change_access(option)
+            ways_layer.updateFeature(osrm_feature.feature)
+            edited_segments +=1
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
         self.iface.messageBar().pushMessage(
             "Info", f"{edited_segments} segments have been edited", Qgis.Info, 10
         )
         self.display_segments()
-
-    def edit_access_segments(self, tags_value, option):
-        """Method to modify tags field depending on option. Option can be "allow_access" or 
-        "restrict_access". If "allow_access", "access" tag is "yes". If "restrict_access", "access"
-        tag is "no". Before been edited previous state will be stored in osmredited tag.
-        In case segement has been edited before, just change the access state. 
-        """
-        # tags_dict = dict(item.split("=>") for item in tags_value.split(", "))
-        tags_dict = tags_value
-        # When it has not been edited before:
-        if "osmredited" not in tags_dict.keys():
-            # if access tag exist save value in osmredited
-            if "access" in tags_dict.keys():
-                tags_dict["osmredited"] = tags_dict["access"]
-            # if access tag does not exist mark as no_access_key
-            else:
-                tags_dict["osmredited"] = "No_Access_Key"
-            # if option selected is restrict access -> no, else if allow access ->yes
-        # In any case change state
-        if option == "restrict_access":
-            tags_dict["access"] = "no"
-        elif option == "allow_access":
-            tags_dict["access"] = "yes"
-        # Convert to hstore tags = ", ".join(f"{k}=>{v}" for k, v in tags_dict.items())
-        return tags_dict
 
     def undo_segment_changes(self):
         """Method to undo all previous changes (access or restrict) in segments"""
@@ -406,36 +384,37 @@ class EditorForRouting:
             return
 
         ways_layer.startEditing()
-        edited_segments = 0
         for feature in selected_features:
-            tags_value = feature[self.tags_field_name]
-            if tags_value:
-                if "osmredited" in tags_value.keys():
-                    edited_segments += 1
-                    if tags_value["osmredited"] == "No_Access_Key":
-                        del tags_value["osmredited"]
-                        del tags_value["access"]
-                    else:
-                        tags_value["access"] = tags_value.pop("osmredited")
-                feature[self.tags_field_name] = tags_value
-                ways_layer.updateFeature(feature)
-        ways_layer.commitChanges()
-        ways_layer.triggerRepaint()
-
-        if edited_segments == 0:
-            self.iface.messageBar().pushMessage(
-                "Alert", "There aren't any previously edited segments", Qgis.Warning, 10
-            )
-        else:
-            self.iface.messageBar().pushMessage(
-                "Info", f"{edited_segments} segments have been restored", Qgis.Info, 10
-            )
-
-        feature[self.tags_field_name] = tags_value
-        ways_layer.updateFeature(feature)
+            osrm_feature = OsrmFeatureData(feature)
+            osrm_feature.change_edited("undo",None)
+            ways_layer.updateFeature(osrm_feature.feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
         self.display_segments()
+
+    def display_segments(self):
+        """Method to display attributes of selected segments in a table"""
+        self.tableView = self.dlg.tableView
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(
+            ["Id", "Name", "Access", "Oneway", "MaxSpeed", "Edited"]
+        )
+
+        # Get selected features and attributes
+        ways_layer = self.check_layer(self.segment_layer_name)
+        selected_features = ways_layer.selectedFeatures()
+        table_data = []
+        if selected_features:
+            for feature in selected_features:
+                osrm_feature = OsrmFeatureData(feature)
+                table_data.append(osrm_feature.get_table_row())
+
+        for data_row in table_data:
+            items = [QStandardItem(data) for data in data_row]
+            model.appendRow(items)
+
+        self.tableView.setModel(model)
+        self.tableView.setColumnWidth(1, 200)
 
     def run_command(self, command):
         """Method to run a subprocess for pbf generation"""
@@ -467,45 +446,3 @@ class EditorForRouting:
     def load_pbf(self):
         # Comprobar si existe la bbdd y si no existe crearla
         pass
-
-    def display_segments(self):
-        """Method to display attributes of selected segments in a table"""
-        self.tableView = self.dlg.tableView
-        model = QStandardItemModel()
-        model.setHorizontalHeaderLabels(['Id', 'Name', 'Highway', 'Access', 'Oneway', 'MaxSpeed', 'Edited'])
-
-        # Get selected features and attributes
-        ways_layer = self.check_layer(self.segment_layer_name)
-        selected_features = ways_layer.selectedFeatures()
-        datos =[]
-        if selected_features:
-            for feature in selected_features:
-                feature_id = f"{feature.id()}"
-                print(feature_id)
-                tags_value = feature[self.tags_field_name]
-                if tags_value:
-                    name = tags_value["name"] if "name" in tags_value.keys() else ""
-                    highway = tags_value["highway"] if "highway" in tags_value.keys() else ""
-                    access = tags_value["access"] if "access" in tags_value.keys() else ""
-                    oneway = tags_value["oneway"] if "oneway" in tags_value.keys() else ""
-                    maxspeed = tags_value["maxspeed"] if "maxspeed" in tags_value.keys() else ""
-                    edited = "yes" if "osmredited" in tags_value.keys() else "no"
-                else:   
-                    name = highway = access = oneway = maxspeed = ""
-                    edited = "no"
-                datos.append([feature_id, name, highway, access, oneway, maxspeed, edited])
-
-        for fila_datos in datos:
-            items = [QStandardItem(dato) for dato in fila_datos]
-            model.appendRow(items)
-
-        self.tableView.setModel(model)
-
-        self.tableView.setColumnWidth(1, 200)
-
-    def perform_cleanup(self):
-        """Method to unselect all features """
-        ways_layer = self.check_layer(self.segment_layer_name)
-        if ways_layer is not None:
-            ways_layer.removeSelection()
-        self.iface.actionIdentify().trigger() #activar la herramienta info
