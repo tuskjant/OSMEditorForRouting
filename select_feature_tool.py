@@ -18,7 +18,10 @@ class SelectFeatureTool(QgsMapToolIdentifyFeature):
             if features:
                 for feature in features:
                     fid = feature.mFeature.id()
-                    self.layer.selectByIds([fid], QgsVectorLayer.AddToSelection)
+                    if fid in self.layer.selectedFeatureIds():
+                        self.layer.deselect(fid)
+                    else:
+                        self.layer.selectByIds([fid], QgsVectorLayer.AddToSelection)
                 self.feature_selected.emit() #emit signal when selected
             else:
                 self.layer.removeSelection()
