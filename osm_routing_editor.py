@@ -207,6 +207,8 @@ class EditorForRouting:
             self.dlg.pushButtonSelectTram.toggled.connect(self.handle_feature_selection)
             self.dlg.pushButtonActiva.clicked.connect(lambda: self.change_segment_access("allow_access"))
             self.dlg.pushButtonDesactiva.clicked.connect(lambda: self.change_segment_access("restrict_access"))
+            self.dlg.pushButtonOneWay.clicked.connect(lambda: self.change_oneway("oneway"))
+            self.dlg.pushButton_BothDirections.clicked.connect(lambda: self.change_oneway("bothways"))
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
@@ -360,17 +362,32 @@ class EditorForRouting:
             return
         ways_layer.startEditing()
 
-        edited_segments = 0
         for feature in selected_features:
-            osrm_feature = OsrmFeatureData(feature)
+            osrm_feature = OsrmFeatureData(feature, self.iface)
             osrm_feature.change_access(option)
             ways_layer.updateFeature(osrm_feature.feature)
-            edited_segments +=1
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
-        self.iface.messageBar().pushMessage(
-            "Info", f"{edited_segments} segments have been edited", Qgis.Info, 10
-        )
+        self.display_segments()
+
+    def change_oneway(self, option):
+        """Method to edit the segments of 'ways' to convert them to one-way or two-way circulation.
+        """
+        ways_layer = self.check_layer(self.segment_layer_name)        
+        selected_features = ways_layer.selectedFeatures()
+        if len(selected_features) < 1:
+            self.iface.messageBar().pushMessage(
+                "Error", "There are no selected features", Qgis.Warning, 10
+            )
+            return
+        ways_layer.startEditing()
+
+        for feature in selected_features:
+            osrm_feature = OsrmFeatureData(feature, self.iface)
+            osrm_feature.change_one_way(option)
+            ways_layer.updateFeature(osrm_feature.feature)
+        ways_layer.commitChanges()
+        ways_layer.triggerRepaint()
         self.display_segments()
 
     def undo_segment_changes(self):
@@ -385,7 +402,7 @@ class EditorForRouting:
 
         ways_layer.startEditing()
         for feature in selected_features:
-            osrm_feature = OsrmFeatureData(feature)
+            osrm_feature = OsrmFeatureData(feature, self.iface)
             osrm_feature.change_edited("undo",None)
             ways_layer.updateFeature(osrm_feature.feature)
         ways_layer.commitChanges()
@@ -406,7 +423,7 @@ class EditorForRouting:
         table_data = []
         if selected_features:
             for feature in selected_features:
-                osrm_feature = OsrmFeatureData(feature)
+                osrm_feature = OsrmFeatureData(feature, self.iface)
                 table_data.append(osrm_feature.get_table_row())
 
         for data_row in table_data:

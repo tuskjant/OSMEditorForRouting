@@ -1,9 +1,11 @@
 from .osrm_car_profile import CarProfile 
+from qgis.core import Qgis
 
 class OsrmFeatureData:
     tags_field_name = "tags"
 
-    def __init__(self, feature):
+    def __init__(self, feature, iface):
+        self.iface = iface
         self.feature = feature
         self.osrm_car_profile = CarProfile()
         self.tags_value = feature[self.tags_field_name]
@@ -53,10 +55,19 @@ class OsrmFeatureData:
     def extract_oneway(self):
         # Oneway restriction following oneway.feature file from osrm
         tags_data = self.get_tags_data("oneway")
-        junction_tag = True if tags_data["junction"] in ["roundabout"] else False
-        highway_tag = True if tags_data["highway"] in ["motorway"] else False
-        one_way_tag = True if tags_data["oneway"] in ["yes", "motor_vehicle=yes", "vehicle=yes", "motorcar=yes"] else False
-        if junction_tag and highway_tag and one_way_tag:
+        if tags_data["junction"] is not None:
+            junction_tag = True if tags_data["junction"] in ["roundabout"] else False
+        else:
+            junction_tag = False
+        if tags_data["highway"] is not None:
+            highway_tag = True if tags_data["highway"] in ["motorway"] else False
+        else:
+            highway_tag = False
+        if tags_data["oneway"] is not None:
+            one_way_tag = True if tags_data["oneway"] in ["yes", "motor_vehicle=yes", "vehicle=yes", "motorcar=yes"] else False
+        else:
+            one_way_tag = False
+        if junction_tag or highway_tag or one_way_tag:
             return "yes"
         else:
             return "no"
@@ -90,16 +101,14 @@ class OsrmFeatureData:
         tags_data = self.get_tags_data("access")
         if option == "restrict_access":
             if self.extract_access_value() == "no":
-                return # restric circulation in a segment already restricted
+                return # restrict circulation in a segment already restricted
             elif self.extract_access_value() == "yes":
-                # self.change_edited("edit",tags_data) #save preedited values
                 self.tags_value["access"] = "no"
 
         elif option == "allow_access":
             if self.extract_access_value() == "yes":
                 return
             elif self.extract_access_value() == "no":
-                # self.change_edited("edit", tags_data)
                 self.tags_value["access"] = "yes"
                 if "vehicle" in tags_data.keys() and tags_data["vehicle"] is not None:
                     del self.tags_value["vehicle"]
@@ -107,12 +116,40 @@ class OsrmFeatureData:
                     del self.tags_value["motor_vehicle"]
                 if "motor-car" in tags_data.keys() and tags_data["motor_car"] is not None:
                     del self.tags_value["motor_car"]
-        # Update tags values of feature
+        # Update tags values of feature and save previous values
         self.feature[self.tags_field_name] = self.tags_value 
         self.change_edited("edit", tags_data)
 
-    def change_one_both_ways(self, option):
-        pass
+    def change_one_way(self, option):
+        """Change tags to set one way restriction or allow both ways circulation. Option must be 'oneway' or 'bothways' """
+        tags_data = self.get_tags_data("oneway")
+
+        if option == "oneway":
+            if self.extract_oneway() == "yes":
+                return #oneway in a segment already one way
+            elif self.extract_oneway() == "no":
+                self.tags_value["oneway"] ="yes"
+
+        elif option == "bothways":
+            if self.extract_oneway() == "no":
+                return
+            elif self.extract_oneway() == "yes":
+                # case roundabout only oneway permited
+                if "junction" in tags_data.keys() and tags_data["junction"] == "roundabout":
+                    self.iface.messageBar().pushMessage(
+                        "Warning", f"feature id:{self.id} is a roundabout. Only oneway permitted", Qgis.Warning, 10
+                    )
+                    return 
+                # case motorway, change to primary
+                elif "highway" in tags_data.keys() and tags_data["highway"] == "motorway":
+                    self.tags_value["highway"] = "primary"
+                # case tag oneway -> change tag to no
+                if "oneway" in tags_data.keys() and tags_data["oneway"] == "yes":
+                    self.tags_value["oneway"] = "no"
+
+        # Update tags values of feature and save previous values
+        self.feature[self.tags_field_name] = self.tags_value
+        self.change_edited("edit", tags_data)
 
     def change_speed(self, speed):
         pass
@@ -151,7 +188,7 @@ class OsrmFeatureData:
                 self.tags_value["osrmedited"] = data_string
 
         # When option is undo:
-        #╠  if it has been edited before -> recover values from osrmedited tag
+        # ╠  if it has been edited before -> recover values from osrmedited tag
         #   else -> nothing to do (no edited - no undo)
         elif option == "undo":
             if edited_data_dict:
