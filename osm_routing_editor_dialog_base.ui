@@ -186,11 +186,14 @@
        <height>25</height>
       </rect>
      </property>
+     <property name="minimum">
+      <number>15</number>
+     </property>
      <property name="maximum">
-      <number>140</number>
+      <number>139</number>
      </property>
      <property name="singleStep">
-      <number>10</number>
+      <number>5</number>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButtonUndoChanges">

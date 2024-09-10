@@ -46,5 +46,4 @@ class CarProfile:
                 if len(key_value) == 2:
                     cleaned_value = re.sub(r"[^\d]", "", key_value[1])
                     highway_speeds[key_value[0]] = int(cleaned_value)
-
         return highway_speeds

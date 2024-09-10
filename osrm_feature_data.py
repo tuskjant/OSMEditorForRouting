@@ -1,5 +1,6 @@
 from .osrm_car_profile import CarProfile 
 from qgis.core import Qgis
+import re
 
 class OsrmFeatureData:
     tags_field_name = "tags"
@@ -74,13 +75,35 @@ class OsrmFeatureData:
 
     def extract_max_speed(self):
         # Max speed following maxspeed.feature file from osrm and car.lua
+        # Speed limits from surface not take into account
         tags_data = self.get_tags_data("speed")
         highway = tags_data["highway"]
         speeds = self.osrm_car_profile.get_speeds()
-        if tags_data["maxspeed"] is not None:
-            return tags_data["maxspeed"]
+        maxspeed_in_tag = self.get_tag_maxspeed(tags_data["maxspeed"])
+        if maxspeed_in_tag is not None:
+            return maxspeed_in_tag
         else:
             return speeds[highway] if highway in speeds.keys() else ""
+
+    def get_tag_maxspeed(self, data):
+        """Convert values of maxspeed tag into km/h or None"""
+        num_pattern = re.compile(r'^(\d+)\s?$')
+        mph_pattern = re.compile(r'^(\d+)\s?mph')
+        knots_pattern = re.compile(r'^(\d+)\s?knots')
+        walk_pattern = re.compile(r'^walk')
+
+        if data is None:
+            return None
+        elif num_pattern.match(data):
+            return int(num_pattern.match(data).group(1))
+        elif mph_pattern.match(data): # convert mph to kmh
+            return int(mph_pattern.match(data).group(1)) * 1.60934
+        elif knots_pattern.match(data): # convert knots to kmh
+            return int(knots_pattern.match(data).group(1)) * 1.852
+        elif walk_pattern.match(data): # walk speed = 15km/h
+            return 15
+        else:
+            return None
 
     def extract_edited(self):
         edited = "yes" if "osrmedited" in self.tags_value.keys() else "no"
@@ -152,7 +175,30 @@ class OsrmFeatureData:
         self.change_edited("edit", tags_data)
 
     def change_speed(self, speed):
-        pass
+        """ Change max speed. If selected speed is higher than speed limit for a way, an alert is shown and no changes apply.
+        Speed limits for way extracted from car lua can differ from real speed limits for a way"""
+        tags_data = self.get_tags_data("speed")
+
+        # Speed depending on way type
+        highway = tags_data["highway"]
+        speeds = self.osrm_car_profile.get_speeds()
+        highway_speed = speeds[highway] if highway in speeds.keys() else ""
+
+        # Speed depending on maxspeed tag
+        maxspeed_in_tag = self.get_tag_maxspeed(tags_data["maxspeed"])
+        # If selected speed is higher than speed limit for a way, an alert is shown and no changes apply
+        if speed > highway_speed:
+            self.iface.messageBar().pushMessage(
+                        "Warning", f"feature id:{self.id} can't increase the speed to {speed}", Qgis.Warning, 10
+                    )
+            return 
+        else:
+            self.tags_value["maxspeed"] = speed
+
+        # Update tags values of feature and save previous values(only for maxspeed)
+        tags_data_speed = {key: tags_data[key] for key in tags_data if key == "maxspeed"}
+        self.feature[self.tags_field_name] = self.tags_value
+        self.change_edited("edit", tags_data_speed)
 
     def osrmedited_to_string(self, data_dict):
         data_string = "|".join([f"{k}=>NULL" if v is None else f"{k}=>{v}" for k, v in data_dict.items()])

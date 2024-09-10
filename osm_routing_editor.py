@@ -209,6 +209,7 @@ class EditorForRouting:
             self.dlg.pushButtonDesactiva.clicked.connect(lambda: self.change_segment_access("restrict_access"))
             self.dlg.pushButtonOneWay.clicked.connect(lambda: self.change_oneway("oneway"))
             self.dlg.pushButton_BothDirections.clicked.connect(lambda: self.change_oneway("bothways"))
+            self.dlg.pushButtonMaxSpeed.clicked.connect(self.change_speed)
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
@@ -385,6 +386,25 @@ class EditorForRouting:
         for feature in selected_features:
             osrm_feature = OsrmFeatureData(feature, self.iface)
             osrm_feature.change_one_way(option)
+            ways_layer.updateFeature(osrm_feature.feature)
+        ways_layer.commitChanges()
+        ways_layer.triggerRepaint()
+        self.display_segments()
+
+    def change_speed(self):
+        """Method to change speed to selected"""
+        speed = self.dlg.spinBoxSpeed.value()
+        ways_layer = self.check_layer(self.segment_layer_name)
+        selected_features = ways_layer.selectedFeatures()
+        if len(selected_features) < 1:
+            self.iface.messageBar().pushMessage(
+                "Error", "There are no selected features", Qgis.Warning, 10
+            )
+            return
+        ways_layer.startEditing()
+        for feature in selected_features:
+            osrm_feature = OsrmFeatureData(feature, self.iface)
+            osrm_feature.change_speed(speed)
             ways_layer.updateFeature(osrm_feature.feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
