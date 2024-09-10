@@ -84,7 +84,7 @@
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
-     <string>OSM Routing editor</string>
+     <string>Parameters</string>
     </attribute>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
@@ -128,7 +128,7 @@
     <widget class="QPushButton" name="pushButtonActiva">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>50</x>
        <y>330</y>
        <width>121</width>
        <height>28</height>
@@ -141,8 +141,8 @@
     <widget class="QPushButton" name="pushButtonDesactiva">
      <property name="geometry">
       <rect>
-       <x>160</x>
-       <y>330</y>
+       <x>50</x>
+       <y>360</y>
        <width>121</width>
        <height>28</height>
       </rect>
@@ -154,9 +154,9 @@
     <widget class="QPushButton" name="pushButtonOneWay">
      <property name="geometry">
       <rect>
-       <x>300</x>
+       <x>230</x>
        <y>330</y>
-       <width>91</width>
+       <width>121</width>
        <height>28</height>
       </rect>
      </property>
@@ -167,8 +167,8 @@
     <widget class="QPushButton" name="pushButton_BothDirections">
      <property name="geometry">
       <rect>
-       <x>410</x>
-       <y>330</y>
+       <x>230</x>
+       <y>360</y>
        <width>121</width>
        <height>28</height>
       </rect>
@@ -180,9 +180,9 @@
     <widget class="QSpinBox" name="spinBoxSpeed">
      <property name="geometry">
       <rect>
-       <x>650</x>
-       <y>330</y>
-       <width>71</width>
+       <x>420</x>
+       <y>360</y>
+       <width>101</width>
        <height>25</height>
       </rect>
      </property>
@@ -212,7 +212,7 @@
     <widget class="QPushButton" name="pushButtonMaxSpeed">
      <property name="geometry">
       <rect>
-       <x>540</x>
+       <x>420</x>
        <y>330</y>
        <width>101</width>
        <height>28</height>
@@ -220,6 +220,148 @@
      </property>
      <property name="text">
       <string>Speed limit</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonDirection">
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>330</y>
+       <width>141</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reverse direction</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_4">
+    <attribute name="title">
+     <string>Geometry</string>
+    </attribute>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>151</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Add segment</string>
+     </property>
+    </widget>
+    <widget class="QTableView" name="tableView_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>971</width>
+       <height>141</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonRoadType">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>240</y>
+       <width>211</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Road type</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxRoadType">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>280</y>
+       <width>211</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBox">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>280</y>
+       <width>191</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_direction">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>240</y>
+       <width>191</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Direction of traffic</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBox">
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>280</y>
+       <width>121</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>120</number>
+     </property>
+     <property name="singleStep">
+      <number>5</number>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_SpeedLimit">
+     <property name="geometry">
+      <rect>
+       <x>480</x>
+       <y>240</y>
+       <width>121</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Speed limit</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_Reverse">
+     <property name="geometry">
+      <rect>
+       <x>620</x>
+       <y>240</y>
+       <width>141</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reverse direction</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_create">
+     <property name="geometry">
+      <rect>
+       <x>830</x>
+       <y>350</y>
+       <width>141</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CREATE SEGMENT</string>
      </property>
     </widget>
    </widget>
