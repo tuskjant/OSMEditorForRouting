@@ -213,6 +213,7 @@ class EditorForRouting:
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
+            self.dlg.button_box.clicked.connect(self.close)
 
         # show the dialog
         self.dlg.show()
@@ -297,6 +298,7 @@ class EditorForRouting:
         ways_layer = self.check_layer(self.segment_layer_name)
         if ways_layer is not None:
             ways_layer.removeSelection()
+        self.display_segments()
         self.iface.actionIdentify().trigger() #activar la herramienta info
 
     def select_features(self):
@@ -483,3 +485,9 @@ class EditorForRouting:
     def load_pbf(self):
         # Comprobar si existe la bbdd y si no existe crearla
         pass
+
+    def close(self):
+        self.perform_cleanup()
+        self.iface.messageBar().pushMessage(
+            "Info", "Exited OSM Editor for Routing pluggin", Qgis.Info, 10
+        )
