@@ -510,10 +510,23 @@ class EditorForRouting:
         """Method for exporting from database to pbf files"""
         pbf_folder = self.dlg.mQgsFileWidget_pbfFolder.filePath()
         osmosis_folder = self.dlg.mQgsFileWidgetOsmosis.filePath()
-        password = self.dlg.lineEditPassword.text()
-        if self.db is not None and self.user is not None and password is not None:
+        if pbf_folder is None or osmosis_folder is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Missing pbf or osmossis folder in settings", Qgis.Warning, 10
+            )
+            return
+
+        self.host = self.dlg.lineEditHost.text()
+        self.port = self.dlg.lineEditPort.text()
+        self.user = self.dlg.lineEditUser.text()
+        self.password = self.dlg.lineEditPassword.text()
+        self.database = self.dlg.lineEditDB.text()
+        self.schema = self.dlg.lineEditSchema.text()
+
+        if self.database is not None and self.user is not None and self.password is not None:
             try: 
-                command = f'cd /d "{osmosis_folder}" && osmosis --read-pgsql database={self.db} user={self.user} password={password} --dataset-dump --write-pbf file={os.path.join(pbf_folder,"output.osm.pbf")}'
+                command = f'cd /d "{osmosis_folder}" && osmosis --read-pgsql host={self.host} database={self.database} user={self.user} password={self.password} postgresSchema={self.schema} --dataset-dump --write-pbf file={os.path.join(pbf_folder,"output.osm.pbf")}'
+
                 stdout, stderr = self.run_command(command)
                 print("Salida", stdout)
                 print("Errores", stderr)
@@ -524,6 +537,11 @@ class EditorForRouting:
                 self.iface.messageBar().pushMessage(
                     "Error", "An error ocurred while converting to pbf", Qgis.Warning, 10
                 )
+        else:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Missing database parameters in settings", Qgis.Warning, 10
+            )
+            return
 
     def load_pbf(self):
         # Comprobar si existe la bbdd y si no existe crearla
