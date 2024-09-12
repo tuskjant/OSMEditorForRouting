@@ -38,6 +38,8 @@ from .select_feature_tool import SelectFeatureTool
 import subprocess
 # osrm feature data to edit features
 from .osrm_feature_data import OsrmFeatureData
+# database funcions
+from .database_functions import *
 
 class EditorForRouting:
     """QGIS Plugin Implementation."""
@@ -210,6 +212,7 @@ class EditorForRouting:
             self.dlg.pushButtonOneWay.clicked.connect(lambda: self.change_oneway("oneway"))
             self.dlg.pushButton_BothDirections.clicked.connect(lambda: self.change_oneway("bothways"))
             self.dlg.pushButtonMaxSpeed.clicked.connect(self.change_speed)
+            self.dlg.pushButtonDirection.clicked.connect(self.change_direction)
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
@@ -238,9 +241,9 @@ class EditorForRouting:
         self.user = self.settings.value('user')
         if self.user is not None:
             self.dlg.lineEditUser.setText(self.user)
-        self.db = self.settings.value('database')
-        if self.db is not None:
-            self.dlg.lineEditDB.setText(self.db)
+        self.database = self.settings.value('database')
+        if self.database is not None:
+            self.dlg.lineEditDB.setText(self.database)
         self.schema = self.settings.value('schema')
         if self.schema is not None:
             self.dlg.lineEditSchema.setText(self.schema)
@@ -412,6 +415,46 @@ class EditorForRouting:
         ways_layer.triggerRepaint()
         self.display_segments()
 
+    def change_direction(self):
+        ways_layer = self.check_layer(self.segment_layer_name)
+
+        # select features
+        selected_features = ways_layer.selectedFeatures()
+        if len(selected_features) < 1:
+            self.iface.messageBar().pushMessage(
+                "Error", "There are no selected features", Qgis.Warning, 10
+            )
+            return
+
+        # create connection
+        parameters = self.get_db_parameters()
+        if parameters == None:
+            return
+        connection, cursor = connect_to_database(parameters)
+        if connection is None or cursor is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not connect to database", Qgis.Warning, 10
+            )
+            return
+
+        # change direction of each feature
+        for feature in selected_features:
+            way_id = feature["id"]
+            # Change direction
+            reversed = change_line_direction(connection, cursor, way_id)
+            if not reversed:
+                self.iface.messageBar().pushMessage(
+                    "Warning", f"Can not reverse {way_id} segment", Qgis.Warning, 10
+                )
+
+        # close connection
+        closed = close_connection(connection, cursor)
+        if not closed:
+            self.iface.messageBar().pushMessage(
+                "Warning", "An error occurred while closing database", Qgis.Warning, 10
+            )
+        return
+
     def undo_segment_changes(self):
         """Method to undo all previous changes (access or restrict) in segments"""
         ways_layer = self.check_layer(self.segment_layer_name)
@@ -491,3 +534,25 @@ class EditorForRouting:
         self.iface.messageBar().pushMessage(
             "Info", "Exited OSM Editor for Routing pluggin", Qgis.Info, 10
         )
+
+    def get_db_parameters(self):
+        # get user connection parameters
+        self.host = self.dlg.lineEditHost.text()
+        self.port = self.dlg.lineEditPort.text()
+        self.user = self.dlg.lineEditUser.text()
+        self.password = self.dlg.lineEditPassword.text()
+        self.database = self.dlg.lineEditDB.text()
+        self.schema = self.dlg.lineEditSchema.text()
+        if self.host and self.port and self.user and self.password and self.database:
+            return {
+                'dbname': self.database, 
+                'user': self.user, 
+                'password': self.password, 
+                'host': self.host, 
+                'port': self.port
+            }
+        else:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Missing connection parameters", Qgis.Warning, 10
+            )
+            return None
