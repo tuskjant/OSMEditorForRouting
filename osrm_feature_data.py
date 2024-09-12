@@ -10,7 +10,7 @@ class OsrmFeatureData:
         self.feature = feature
         self.osrm_car_profile = CarProfile()
         self.tags_value = feature[self.tags_field_name]
-        self.id = feature.id()
+        self.id = feature["id"]
         self.name = self.tags_value["name"] if "name" in self.tags_value.keys() else ""
 
     def get_tags_data(self, data_option):

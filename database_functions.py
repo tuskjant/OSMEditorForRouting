@@ -62,15 +62,12 @@ def change_line_direction(connection, cursor, way_id):
         if not rows:
             return False
         max_sequence_id = max(row[1] for row in rows)
-        print(f"maxsequence {max_sequence_id}")
 
         # Reverse sequence id for rows
         reversed_rows = [(row[0], max_sequence_id - row[1]) for row in rows]
-        print(reversed_rows)
 
         # Reverse sequence id: delete preveious values and insert new values (avoid restriction)
         delete_query = f"DELETE FROM {way_node_table} WHERE way_id = %s"
-        print(delete_query)
         cursor.execute(delete_query, (way_id,))
 
         insert_query = f"INSERT INTO {way_node_table} (way_id, node_id, sequence_id) VALUES (%s, %s, %s)"
