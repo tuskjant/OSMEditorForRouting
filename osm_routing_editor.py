@@ -251,20 +251,12 @@ class EditorForRouting:
     def add_layer(self):
         """ Method to load ways layer from database
         """
-        # get user connection parameters
-        self.host = self.dlg.lineEditHost.text()
-        self.port = self.dlg.lineEditPort.text()
-        self.user = self.dlg.lineEditUser.text()
-        self.password = self.dlg.lineEditPassword.text()
-        self.database = self.dlg.lineEditDB.text()
-        self.schema = self.dlg.lineEditSchema.text()
-
-        # save connection parameters to settings
-        self.settings.setValue('host', self.host)
-        self.settings.setValue('port', self.port)
-        self.settings.setValue('user', self.user)
-        self.settings.setValue('database', self.database)
-        self.settings.setValue('schema', self.schema)
+        # get connection parameters
+        if not self.get_db_parameters():
+            self.iface.messageBar().pushMessage(
+                "Warning", "Missing connection parameters", Qgis.Warning, 10
+            )
+            return 
 
         # set connection
         uri = QgsDataSourceUri()
@@ -428,7 +420,7 @@ class EditorForRouting:
 
         # create connection
         parameters = self.get_db_parameters()
-        if parameters == None:
+        if not parameters:
             return
         connection, cursor = connect_to_database(parameters)
         if connection is None or cursor is None:
@@ -619,6 +611,7 @@ class EditorForRouting:
         )
 
     def get_db_parameters(self):
+
         # get user connection parameters
         self.host = self.dlg.lineEditHost.text()
         self.port = self.dlg.lineEditPort.text()
@@ -626,19 +619,29 @@ class EditorForRouting:
         self.password = self.dlg.lineEditPassword.text()
         self.database = self.dlg.lineEditDB.text()
         self.schema = self.dlg.lineEditSchema.text()
-        if self.host and self.port and self.user and self.password and self.database:
+
+        # save connection parameters to settings
+        self.settings.setValue("host", self.host)
+        self.settings.setValue("port", self.port)
+        self.settings.setValue("user", self.user)
+        self.settings.setValue("database", self.database)
+        self.settings.setValue("schema", self.schema)
+
+        # return parameters dict
+        if self.host and self.port and self.user and self.password and self.database and self.schema:
             return {
                 'dbname': self.database, 
                 'user': self.user, 
                 'password': self.password, 
                 'host': self.host, 
-                'port': self.port
+                'port': self.port,
+                'schema': self.schema
             }
         else:
             self.iface.messageBar().pushMessage(
                 "Warning", "Missing connection parameters", Qgis.Warning, 10
             )
-            return None
+            return False
 
     def get_osmosis_folder(self):
         osmosis_folder = self.dlg.mQgsFileWidgetOsmosis.filePath()

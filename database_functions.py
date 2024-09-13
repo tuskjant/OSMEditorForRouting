@@ -5,15 +5,18 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 def connect_to_database(database_params):
     """
     Set database connection to postgresql
-    :database_params: dictionay with database parameters {'dbname':*, 'user':*, 'password':*, 'host':*, 'port':*}
+    :database_params: dictionay with database parameters {'dbname':*, 'user':*, 'password':*, 'host':*, 'port':*, 'schema':*}
     :return: Database connection and cursor.
     *default schema is public
     """
+    del database_params["schema"]# schema parameter is not used in connection-> del schema parameter
+    
     try:
         conn = psycopg2.connect(**database_params)
         cursor = conn.cursor()
         return conn, cursor
     except Exception as e:
+        print(e)
         return None, None
 
 
