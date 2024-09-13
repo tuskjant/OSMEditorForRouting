@@ -186,6 +186,7 @@ class OsrmFeatureData:
 
         # Speed depending on maxspeed tag
         maxspeed_in_tag = self.get_tag_maxspeed(tags_data["maxspeed"])
+        
         # If selected speed is higher than speed limit for a way, an alert is shown and no changes apply
         if speed > highway_speed:
             self.iface.messageBar().pushMessage(
@@ -199,6 +200,19 @@ class OsrmFeatureData:
         tags_data_speed = {key: tags_data[key] for key in tags_data if key == "maxspeed"}
         self.feature[self.tags_field_name] = self.tags_value
         self.change_edited("edit", tags_data_speed)
+
+    def change_direction(self):
+        direction = (self.tags_value["direction"] if "direction" in self.tags_value.keys() else None)
+        tags_data = {"direction": direction}
+
+        if tags_data["direction"] == "reversed":
+            self.tags_value["direction"] = "normal"
+        else:
+            self.tags_value["direction"] = "reversed"
+
+        # Update tags values of feature and save previous values
+        self.feature[self.tags_field_name] = self.tags_value
+        self.change_edited("edit", tags_data)
 
     def osrmedited_to_string(self, data_dict):
         data_string = "|".join([f"{k}=>NULL" if v is None else f"{k}=>{v}" for k, v in data_dict.items()])
@@ -218,6 +232,7 @@ class OsrmFeatureData:
         if edited_data:
             edited_data_dict = self.osrmedited_to_dict(edited_data)
         else:
+            print("edited_data_dict is none")
             edited_data_dict = None
 
         # When option is edit:
@@ -225,12 +240,15 @@ class OsrmFeatureData:
         #   else -> add necessary values
         if option == "edit":
             if edited_data_dict:
+                print("not none")
                 for tag in data.keys():
                     if tag not in edited_data_dict.keys():
                         edited_data_dict[tag] = data[tag]
                 self.tags_value["osrmedited"] = self.osrmedited_to_string(edited_data_dict)
             else:
+                print("again none")
                 data_string = self.osrmedited_to_string(data)
+                print(data_string)
                 self.tags_value["osrmedited"] = data_string
 
         # When option is undo:

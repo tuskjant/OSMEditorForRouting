@@ -445,6 +445,21 @@ class EditorForRouting:
             self.iface.messageBar().pushMessage(
                 "Warning", "An error occurred while closing database", Qgis.Warning, 10
             )
+
+        # Updata layer display
+        ways_layer.triggerRepaint()
+
+        # mark feature as edited
+        ways_layer = self.check_layer(self.segment_layer_name)
+        ways_layer.startEditing()
+        for feature in selected_features:
+            osrm_feature = OsrmFeatureData(feature, self.iface)
+            osrm_feature.change_direction()
+            ways_layer.updateFeature(osrm_feature.feature)
+        ways_layer.commitChanges()
+        ways_layer.triggerRepaint()
+        self.display_segments()
+
         return
 
     def undo_segment_changes(self):
