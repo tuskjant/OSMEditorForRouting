@@ -232,7 +232,6 @@ class OsrmFeatureData:
         if edited_data:
             edited_data_dict = self.osrmedited_to_dict(edited_data)
         else:
-            print("edited_data_dict is none")
             edited_data_dict = None
 
         # When option is edit:
@@ -240,15 +239,12 @@ class OsrmFeatureData:
         #   else -> add necessary values
         if option == "edit":
             if edited_data_dict:
-                print("not none")
                 for tag in data.keys():
                     if tag not in edited_data_dict.keys():
                         edited_data_dict[tag] = data[tag]
                 self.tags_value["osrmedited"] = self.osrmedited_to_string(edited_data_dict)
             else:
-                print("again none")
                 data_string = self.osrmedited_to_string(data)
-                print(data_string)
                 self.tags_value["osrmedited"] = data_string
 
         # When option is undo:

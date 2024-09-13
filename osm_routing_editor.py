@@ -517,8 +517,6 @@ class EditorForRouting:
         """Method for exporting from database to pbf files"""
         pbf_folder = self.get_pbf_folder()
         osmosis_folder = self.get_osmosis_folder()
-        print(f"osmosis folder {osmosis_folder}" )
-        print(type(osmosis_folder))
         if not pbf_folder or not osmosis_folder:
             return
 
