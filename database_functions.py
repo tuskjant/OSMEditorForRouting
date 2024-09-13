@@ -1,4 +1,6 @@
 import psycopg2
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+
 
 def connect_to_database(database_params):
     """
@@ -81,5 +83,51 @@ def change_line_direction(connection, cursor, way_id):
         return False
     return True
 
+def create_db(conn_params):
+    # Connect using postgres database and create new database using parameters values
+    try:
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user=conn_params["user"],
+            password=conn_params["password"],
+            host=conn_params["host"],
+        )
+        # deactivate autocommit mode
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cursor = conn.cursor()
+        query = f"CREATE DATABASE {conn_params["dbname"]};"
+        cursor.execute(query)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
+def create_extensions(connection, cursor):
+    # Create postgis i hstore extensions
+    try:
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS postgis;")
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS hstore;")
+        connection.commit()
+        return True
+    except Exception as e:
+        print(e)
+        connection.rollback()
+        return False
 
+def execute_sql_file(connection, cursor, sql_file_path):
+    with open(sql_file_path, 'r') as sql_file:
+        sql_commands = sql_file.read()
+
+    try:
+        cursor.execute(sql_commands)
+        connection.commit()  
+    except Exception as e:
+        print(e)
+        connection.rollback()  
+        return False
+    return True

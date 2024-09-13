@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -32,9 +32,9 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>20</x>
        <y>130</y>
-       <width>441</width>
+       <width>351</width>
        <height>181</height>
       </rect>
      </property>
@@ -58,7 +58,7 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>100</y>
+        <y>130</y>
         <width>201</width>
         <height>28</height>
        </rect>
@@ -374,18 +374,18 @@
       <rect>
        <x>30</x>
        <y>220</y>
-       <width>111</width>
+       <width>181</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>Osmosis utility:</string>
+      <string>Osmosis utility (bin folder):</string>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="mQgsFileWidgetOsmosis">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>210</x>
        <y>220</y>
        <width>241</width>
        <height>27</height>
@@ -403,18 +403,18 @@
       <rect>
        <x>30</x>
        <y>270</y>
-       <width>121</width>
+       <width>141</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>OSM pbf folder:</string>
+      <string>Output OSM pbf folder:</string>
      </property>
     </widget>
     <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFolder">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>210</x>
        <y>270</y>
        <width>241</width>
        <height>27</height>
@@ -577,6 +577,29 @@
        </rect>
       </property>
      </widget>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>320</y>
+       <width>151</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Input OSM pbf file:</string>
+     </property>
+    </widget>
+    <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFile">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>320</y>
+       <width>241</width>
+       <height>27</height>
+      </rect>
+     </property>
     </widget>
    </widget>
   </widget>

@@ -508,12 +508,11 @@ class EditorForRouting:
 
     def convert_to_pbf(self):
         """Method for exporting from database to pbf files"""
-        pbf_folder = self.dlg.mQgsFileWidget_pbfFolder.filePath()
-        osmosis_folder = self.dlg.mQgsFileWidgetOsmosis.filePath()
-        if pbf_folder is None or osmosis_folder is None:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Missing pbf or osmossis folder in settings", Qgis.Warning, 10
-            )
+        pbf_folder = self.get_pbf_folder()
+        osmosis_folder = self.get_osmosis_folder()
+        print(f"osmosis folder {osmosis_folder}" )
+        print(type(osmosis_folder))
+        if not pbf_folder or not osmosis_folder:
             return
 
         self.host = self.dlg.lineEditHost.text()
@@ -544,8 +543,74 @@ class EditorForRouting:
             return
 
     def load_pbf(self):
-        # Comprobar si existe la bbdd y si no existe crearla
-        pass
+        # Try to create new db using settings
+        parameters = self.get_db_parameters()
+        db_created = create_db(parameters)
+        if not db_created:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not create the database", Qgis.Warning, 10
+            )
+            return
+
+        # Connect to database
+        connection, cursor = connect_to_database(parameters)
+        if connection is None or cursor is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not connect to the database", Qgis.Warning, 10
+            )
+            return
+
+        # Create extensions
+        extension_created = create_extensions(connection, cursor)
+        if not extension_created:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not create extensions", Qgis.Warning, 10
+            )
+            return
+
+        # Get osmosis script path
+        osmosis_bin_folder = self.get_osmosis_folder()
+        if not osmosis_bin_folder:
+            return
+        osmosis_path = os.path.dirname(osmosis_bin_folder)
+        osmosis_script_path = os.path.join(osmosis_path,"script")
+
+        # Create database schema and tables
+        schema_script = os.path.join(osmosis_script_path,"pgsnapshot_schema_0.6.sql")
+        schema_executed = execute_sql_file(connection, cursor, schema_script)
+        if not schema_executed:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not create database schema and tables", Qgis.Warning, 10
+            )
+            return
+
+        # Add geometry
+        bbox_script = os.path.join(osmosis_script_path, "pgsnapshot_schema_0.6_bbox.sql")
+        line_script = os.path.join(osmosis_script_path, "pgsnapshot_schema_0.6_linestring.sql")
+        bbox_executed = execute_sql_file(connection, cursor, bbox_script)
+        line_executed = execute_sql_file(connection, cursor, line_script)
+        if not bbox_executed or not line_executed:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not create geometry in tables", Qgis.Warning, 10
+            )
+            return
+
+        # Execute osmosis pbf -> pgsql
+        pbf_file = self.get_pbf_file()
+        if not pbf_file:
+            return
+        try: 
+            command = f'cd /d "{osmosis_bin_folder}" && osmosis --read-pbf "{pbf_file}" --write-pgsql host={self.host} database={self.database} user={self.user} password={self.password} postgresSchema={self.schema}'
+            stdout, stderr = self.run_command(command)
+            print("Salida", stdout)
+            print("Errores", stderr)
+            self.iface.messageBar().pushMessage(
+                "Info", "Pbf file loaded to database", Qgis.Success, 10
+            )
+        except:
+            self.iface.messageBar().pushMessage(
+                "Error", "An error ocurred while loading pbf file", Qgis.Warning, 10
+            )
 
     def close(self):
         self.perform_cleanup()
@@ -574,3 +639,39 @@ class EditorForRouting:
                 "Warning", "Missing connection parameters", Qgis.Warning, 10
             )
             return None
+
+    def get_osmosis_folder(self):
+        osmosis_folder = self.dlg.mQgsFileWidgetOsmosis.filePath()
+        if osmosis_folder is None:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "Missing osmossis folder in settings",
+                Qgis.Warning,
+                10,
+            )
+            return False
+        return osmosis_folder
+
+    def get_pbf_folder(self):
+        pbf_folder = self.dlg.mQgsFileWidget_pbfFolder.filePath()
+        if pbf_folder is None:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "Missing pbf folder in settings",
+                Qgis.Warning,
+                10,
+            )
+            return False
+        return pbf_folder
+
+    def get_pbf_file(self):
+        pbf_file = self.dlg.mQgsFileWidget_pbfFile.filePath()
+        if pbf_file is None:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "Missing input pbf file in settings",
+                Qgis.Warning,
+                10,
+            )
+            return False
+        return pbf_file
