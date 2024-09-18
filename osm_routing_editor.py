@@ -21,7 +21,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QTimer
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 from qgis.PyQt.QtWidgets import QAction, QTableView
 from qgis.core import QgsDataSourceUri, QgsVectorLayer, QgsProject, Qgis, QgsMapLayer, QgsWkbTypes
@@ -40,6 +40,8 @@ import subprocess
 from .osrm_feature_data import OsrmFeatureData
 # database funcions
 from .database_functions import *
+# tool to create new line
+from .add_line_functions import *
 
 class EditorForRouting:
     """QGIS Plugin Implementation."""
@@ -214,6 +216,7 @@ class EditorForRouting:
             self.dlg.pushButtonMaxSpeed.clicked.connect(self.change_speed)
             self.dlg.pushButtonDirection.clicked.connect(self.change_direction)
             self.dlg.pushButtonUndoChanges.clicked.connect(self.undo_segment_changes)
+            self.dlg.pushButton_addSegment.clicked.connect(self.add_segment)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
             self.dlg.button_box.clicked.connect(self.close)
@@ -691,3 +694,30 @@ class EditorForRouting:
             )
             return False
         return pbf_file
+
+    def add_segment(self):
+        # Create temporary layer
+        self.temp_layer = create_temporary_line_layer()
+        if self.temp_layer is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Cannot create new segment", Qgis.Warning, 10
+            )
+            return
+
+        # Connect signal to finish edition
+        self.temp_layer.featureAdded.connect(self.feature_added)
+
+        # Start layer edition
+        start_editing_layer(self.temp_layer)
+
+        # Activate tool to add lines
+        line_tool_activated = activate_add_line_tool(self.iface, self.temp_layer)
+        if not line_tool_activated:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Cannot activate segment edition", Qgis.Warning, 10
+            )
+            return
+
+    def feature_added(self):
+        self.temp_layer.featureAdded.disconnect() # disconnect signal
+        finish_editing_layer(self.temp_layer)
