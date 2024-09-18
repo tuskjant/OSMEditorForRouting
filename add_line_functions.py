@@ -1,4 +1,4 @@
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsSnappingConfig, QgsSnappingUtils, QgsTolerance
 from qgis.utils import iface
 
 # Create temporary layer
@@ -32,3 +32,15 @@ def activate_add_line_tool(iface, layer):
 def finish_editing_layer(layer):
     layer.commitChanges()
 
+# Activate snappin to ways layer
+def enable_snapping_for_layer(ways_layer):
+    snapping_config = QgsSnappingConfig()
+
+    snapping_config.setEnabled(True)
+    snapping_config.setType(QgsSnappingConfig.Vertex)  
+    snapping_config.setTolerance(10)
+    snapping_config.setMode(QgsSnappingConfig.SnappingMode.AdvancedConfiguration)
+    lyr_settings = QgsSnappingConfig.IndividualLayerSettings(True, QgsSnappingConfig.SnappingType.Vertex, 10, QgsTolerance.Pixels)
+    snapping_config.setIndividualLayerSettings(ways_layer, lyr_settings) 
+
+    QgsProject.instance().setSnappingConfig(snapping_config)

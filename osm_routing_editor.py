@@ -707,6 +707,11 @@ class EditorForRouting:
         # Connect signal to finish edition
         self.temp_layer.featureAdded.connect(self.feature_added)
 
+        # Activate snapping options
+        ways_layer = self.check_layer(self.segment_layer_name)
+        if ways_layer is not None:
+            enable_snapping_for_layer(ways_layer)
+
         # Start layer edition
         start_editing_layer(self.temp_layer)
 
