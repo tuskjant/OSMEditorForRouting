@@ -43,11 +43,14 @@ from .database_functions import *
 # tool to create new line
 from .add_line_functions import *
 
+from .osrm_new_segment import NewSegment
+
 class EditorForRouting:
     """QGIS Plugin Implementation."""
     segment_layer_name = "ways"
     tags_field_name = "tags"
     ways_style_file = "ways_style.qml"
+    ways_temp_style_file = "ways_temp.qml"
 
     def __init__(self, iface):
         """Constructor.
@@ -192,6 +195,23 @@ class EditorForRouting:
         self.dlg = EditorForRoutingDialog(routing_editor=self)
         self.load_settings()
 
+        # Populate combobox values
+        lst_road_type = [
+            "primary",
+            "secondary",
+            "tertiary",
+            "residential",
+            "motorway",
+            "trunk"
+        ]
+        self.dlg.comboBoxRoadType.addItems(lst_road_type)
+
+        lst_direction = ["one-way", "both-ways"]
+        self.dlg.comboBox_direction.addItems(lst_direction)
+
+        #initialize table View
+        self.tableView = None
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -219,6 +239,12 @@ class EditorForRouting:
             self.dlg.pushButton_addSegment.clicked.connect(self.add_segment)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
+            self.dlg.pushButtonRoadType.clicked.connect(self.ns_change_road_type)
+            self.dlg.pushButton_direction.clicked.connect(self.ns_change_direction)
+            self.dlg.pushButton_SpeedLimit.clicked.connect(self.ns_change_speed)
+            self.dlg.pushButton_Reverse.clicked.connect(self.ns_reverse)
+            self.dlg.pushButtonDelete.clicked.connect(self.ns_delete_segment)
+            self.dlg.pushButton_create.clicked.connect(self.ns_create_segment)
             self.dlg.button_box.clicked.connect(self.close)
 
         # show the dialog
@@ -726,3 +752,96 @@ class EditorForRouting:
     def feature_added(self):
         self.temp_layer.featureAdded.disconnect() # disconnect signal
         finish_editing_layer(self.temp_layer)
+
+        # apply symbology
+        qml_path = os.path.join(os.path.dirname(__file__), self.ways_temp_style_file)
+        if self.temp_layer.isValid():
+            self.temp_layer.loadNamedStyle(qml_path)
+            self.temp_layer.triggerRepaint()
+
+        # Display new segment data in a table
+        self.new_segment = NewSegment(self.temp_layer)
+        if self.new_segment:
+            data = self.new_segment.get_table_data()
+            self.display_new_segments(data)
+
+    def display_new_segments(self, new_segment_data):
+        """Method to display attributes of new created segments in a table"""
+
+        #Create new table
+        self.tableView = self.dlg.tableView_newSegment
+        #Clear previous data
+        self.clear_new_segment_table()
+
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(
+            ["Id", "Road type", "Direction", "Max speed"]
+        )
+
+        items = [QStandardItem(data) for data in new_segment_data]
+        model.appendRow(items)
+
+        self.tableView.setModel(model)
+        self.tableView.setColumnWidth(1, 200)
+
+    def clear_new_segment_table(self):
+        """Clear the data in the tableView"""
+        if self.tableView is not None and self.tableView.model() is not None:
+            model = self.tableView.model()
+            
+            if model.rowCount() > 0:
+                model.removeRows(0, model.rowCount())
+
+    def ns_change_road_type(self):
+        if not self.new_segment:
+            self.iface.messageBar().pushMessage("Warning", "You need to add a new segment first", Qgis.Warning, 10,)
+            return
+        type = str(self.dlg.comboBoxRoadType.currentText())
+        self.new_segment.road_type = type
+        self.display_new_segments(self.new_segment.get_table_data())
+
+    def ns_change_direction(self):
+        if not self.new_segment:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "You need to add a new segment first",
+                Qgis.Warning,
+                10,
+            )
+            return
+        direction = str(self.dlg.comboBox_direction.currentText())
+        self.new_segment.direction = direction
+        self.display_new_segments(self.new_segment.get_table_data())
+
+    def ns_change_speed(self):
+        if not self.new_segment:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "You need to add a new segment first",
+                Qgis.Warning,
+                10,
+            )
+            return
+        maxspeed = str(self.dlg.spinBoxSpeed_2.value())
+        self.new_segment.max_speed = maxspeed
+        self.display_new_segments(self.new_segment.get_table_data())
+
+    def ns_reverse(self):
+        if not self.temp_layer:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "You need to add a new segment first",
+                Qgis.Warning,
+                10,
+            )
+            return
+        reverse_line_direction_in_place(self.temp_layer)
+        self.new_segment.geometry = NewSegment.extract_geometry(None, self.temp_layer)
+
+    def ns_delete_segment(self):
+        self.clear_new_segment_table()
+        delete_temporary_line_layer()
+        self.canvas.refresh()
+    
+    def ns_create_segment(self):
+        pass

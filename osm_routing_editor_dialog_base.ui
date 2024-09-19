@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -33,9 +33,9 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>130</y>
-       <width>351</width>
-       <height>181</height>
+       <y>220</y>
+       <width>841</width>
+       <height>151</height>
       </rect>
      </property>
      <property name="title">
@@ -44,8 +44,8 @@
      <widget class="QPushButton" name="pushButtonLoadPbf">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>50</y>
+        <x>40</x>
+        <y>70</y>
         <width>201</width>
         <height>28</height>
        </rect>
@@ -57,8 +57,8 @@
      <widget class="QPushButton" name="pushButtonToPbf">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>130</y>
+        <x>560</x>
+        <y>70</y>
         <width>201</width>
         <height>28</height>
        </rect>
@@ -68,23 +68,38 @@
       </property>
      </widget>
     </widget>
-    <widget class="QPushButton" name="pushButtonAddLayers">
+    <widget class="QGroupBox" name="groupBox_4">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>40</y>
-       <width>141</width>
-       <height>28</height>
+       <x>19</x>
+       <y>39</y>
+       <width>841</width>
+       <height>141</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Add layer</string>
+     <property name="title">
+      <string>Layers</string>
      </property>
+     <widget class="QPushButton" name="pushButtonAddLayers">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>50</y>
+        <width>141</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Add ways layer</string>
+      </property>
+     </widget>
     </widget>
+    <zorder>groupBox_4</zorder>
+    <zorder>groupBox_2</zorder>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
-     <string>Parameters</string>
+     <string>Edit segments</string>
     </attribute>
     <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
@@ -238,7 +253,7 @@
    </widget>
    <widget class="QWidget" name="tab_4">
     <attribute name="title">
-     <string>Geometry</string>
+     <string>Add segments</string>
     </attribute>
     <widget class="QPushButton" name="pushButton_addSegment">
      <property name="geometry">
@@ -253,13 +268,13 @@
       <string>Add segment</string>
      </property>
     </widget>
-    <widget class="QTableView" name="tableView_2">
+    <widget class="QTableView" name="tableView_newSegment">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>80</y>
-       <width>971</width>
-       <height>141</height>
+       <width>961</width>
+       <height>71</height>
       </rect>
      </property>
     </widget>
@@ -267,7 +282,7 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>240</y>
+       <y>200</y>
        <width>211</width>
        <height>28</height>
       </rect>
@@ -280,17 +295,17 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>280</y>
+       <y>240</y>
        <width>211</width>
        <height>25</height>
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="comboBox_direction">
      <property name="geometry">
       <rect>
        <x>270</x>
-       <y>280</y>
+       <y>240</y>
        <width>191</width>
        <height>25</height>
       </rect>
@@ -300,7 +315,7 @@
      <property name="geometry">
       <rect>
        <x>270</x>
-       <y>240</y>
+       <y>200</y>
        <width>191</width>
        <height>28</height>
       </rect>
@@ -309,11 +324,11 @@
       <string>Direction of traffic</string>
      </property>
     </widget>
-    <widget class="QSpinBox" name="spinBox">
+    <widget class="QSpinBox" name="spinBoxSpeed_2">
      <property name="geometry">
       <rect>
        <x>480</x>
-       <y>280</y>
+       <y>240</y>
        <width>121</width>
        <height>25</height>
       </rect>
@@ -329,7 +344,7 @@
      <property name="geometry">
       <rect>
        <x>480</x>
-       <y>240</y>
+       <y>200</y>
        <width>121</width>
        <height>28</height>
       </rect>
@@ -342,7 +357,7 @@
      <property name="geometry">
       <rect>
        <x>620</x>
-       <y>240</y>
+       <y>200</y>
        <width>141</width>
        <height>28</height>
       </rect>
@@ -354,14 +369,27 @@
     <widget class="QPushButton" name="pushButton_create">
      <property name="geometry">
       <rect>
-       <x>830</x>
-       <y>350</y>
+       <x>860</x>
+       <y>330</y>
        <width>141</width>
        <height>28</height>
       </rect>
      </property>
      <property name="text">
       <string>CREATE SEGMENT</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonDelete">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>330</y>
+       <width>121</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>DELETE SEGMENT</string>
      </property>
     </widget>
    </widget>

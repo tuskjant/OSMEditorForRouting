@@ -1,8 +1,13 @@
-from qgis.core import QgsProject, QgsVectorLayer, QgsSnappingConfig, QgsSnappingUtils, QgsTolerance
-from qgis.utils import iface
+from qgis.core import QgsProject, QgsVectorLayer, QgsSnappingConfig, QgsTolerance
+import processing
+
 
 # Create temporary layer
 def create_temporary_line_layer():
+    # Remove previous layers
+    delete_temporary_line_layer()
+
+    # Create new layer
     layer = QgsVectorLayer("LineString?crs=EPSG:4326", "Temporary way", "memory")
     if not layer.isValid():
         return None
@@ -44,3 +49,34 @@ def enable_snapping_for_layer(ways_layer):
     snapping_config.setIndividualLayerSettings(ways_layer, lyr_settings) 
 
     QgsProject.instance().setSnappingConfig(snapping_config)
+
+# Reverse line direction
+def reverse_line_direction_in_place(layer):
+    if not layer.isEditable():
+        layer.startEditing()
+
+    # processing parameterse
+    params = {
+        "INPUT": layer,
+        "OUTPUT": "memory:",  #memory layer for output
+    }
+
+    # Run process
+    result = processing.run("native:reverselinedirection", params)
+    reversed_layer = result["OUTPUT"]
+
+    # Replace original gemetry
+    for feat_original, feat_reversed in zip(
+        layer.getFeatures(), reversed_layer.getFeatures()
+    ):
+        layer.changeGeometry(feat_original.id(), feat_reversed.geometry())
+
+    # Save changes
+    layer.commitChanges()
+
+# Delete temporary layer
+def delete_temporary_line_layer():
+    layers = QgsProject.instance().mapLayersByName("Temporary way")
+    if layers:
+        for layer in layers:
+            QgsProject.instance().removeMapLayer(layer)    
