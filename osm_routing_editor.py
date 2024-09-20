@@ -876,6 +876,14 @@ class EditorForRouting:
                 "Warning", "Can not insert data into database", Qgis.Warning, 10
             )
             return
-        
+
         # close connection
         close_connection(connection, cursor)
+
+        # refresh screen and clean temporary data
+        self.ns_delete_segment()
+        ways_layer = self.check_layer(self.segment_layer_name)
+        if ways_layer is not None:
+            ways_layer.triggerRepaint()
+        self.canvas.refresh()
+
