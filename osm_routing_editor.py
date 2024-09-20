@@ -209,7 +209,7 @@ class EditorForRouting:
         lst_direction = ["one-way", "both-ways"]
         self.dlg.comboBox_direction.addItems(lst_direction)
 
-        #initialize table View
+        # initialize table View
         self.tableView = None
 
     def unload(self):
@@ -244,7 +244,7 @@ class EditorForRouting:
             self.dlg.pushButton_SpeedLimit.clicked.connect(self.ns_change_speed)
             self.dlg.pushButton_Reverse.clicked.connect(self.ns_reverse)
             self.dlg.pushButtonDelete.clicked.connect(self.ns_delete_segment)
-            self.dlg.pushButton_create.clicked.connect(self.ns_create_segment)
+            self.dlg.pushButton_create.clicked.connect(self.ns_create_segment_db)
             self.dlg.button_box.clicked.connect(self.close)
 
         # show the dialog
@@ -765,12 +765,25 @@ class EditorForRouting:
             data = self.new_segment.get_table_data()
             self.display_new_segments(data)
 
+    def check_new_segment(self):
+        if not hasattr(self, 'new_segment') or self.new_segment is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "You need to add a new segment first.", Qgis.Warning, 10
+            )
+            return False
+        if not hasattr(self, 'temp_layer') or self.temp_layer is None or not self.temp_layer.isValid():
+            self.iface.messageBar().pushMessage(
+                "Warning", "You need to add a new segment first.", Qgis.Warning, 10
+            )
+            return False
+        return True
+
     def display_new_segments(self, new_segment_data):
         """Method to display attributes of new created segments in a table"""
 
-        #Create new table
+        # Create new table
         self.tableView = self.dlg.tableView_newSegment
-        #Clear previous data
+        # Clear previous data
         self.clear_new_segment_table()
 
         model = QStandardItemModel()
@@ -788,52 +801,32 @@ class EditorForRouting:
         """Clear the data in the tableView"""
         if self.tableView is not None and self.tableView.model() is not None:
             model = self.tableView.model()
-            
             if model.rowCount() > 0:
                 model.removeRows(0, model.rowCount())
 
     def ns_change_road_type(self):
-        if not self.new_segment:
-            self.iface.messageBar().pushMessage("Warning", "You need to add a new segment first", Qgis.Warning, 10,)
+        if not self.check_new_segment():
             return
         type = str(self.dlg.comboBoxRoadType.currentText())
         self.new_segment.road_type = type
         self.display_new_segments(self.new_segment.get_table_data())
 
     def ns_change_direction(self):
-        if not self.new_segment:
-            self.iface.messageBar().pushMessage(
-                "Warning",
-                "You need to add a new segment first",
-                Qgis.Warning,
-                10,
-            )
+        if not self.check_new_segment():
             return
         direction = str(self.dlg.comboBox_direction.currentText())
         self.new_segment.direction = direction
         self.display_new_segments(self.new_segment.get_table_data())
 
     def ns_change_speed(self):
-        if not self.new_segment:
-            self.iface.messageBar().pushMessage(
-                "Warning",
-                "You need to add a new segment first",
-                Qgis.Warning,
-                10,
-            )
+        if not self.check_new_segment():
             return
         maxspeed = str(self.dlg.spinBoxSpeed_2.value())
         self.new_segment.max_speed = maxspeed
         self.display_new_segments(self.new_segment.get_table_data())
 
     def ns_reverse(self):
-        if not self.temp_layer:
-            self.iface.messageBar().pushMessage(
-                "Warning",
-                "You need to add a new segment first",
-                Qgis.Warning,
-                10,
-            )
+        if not self.check_new_segment():
             return
         reverse_line_direction_in_place(self.temp_layer)
         self.new_segment.geometry = NewSegment.extract_geometry(None, self.temp_layer)
@@ -841,7 +834,48 @@ class EditorForRouting:
     def ns_delete_segment(self):
         self.clear_new_segment_table()
         delete_temporary_line_layer()
+        self.new_segment = None
+        self.temp_layer = None
         self.canvas.refresh()
-    
-    def ns_create_segment(self):
-        pass
+
+    def ns_create_segment_db(self):
+        if not self.check_new_segment():
+            return
+
+        # create connection
+        parameters = self.get_db_parameters()
+        if not parameters:
+            return
+        connection, cursor = connect_to_database(parameters)
+        if connection is None or cursor is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not connect to database", Qgis.Warning, 10
+            )
+            return
+
+        # get max ids for ways and nodes
+        max_node_id = get_max_node_id(cursor)
+        max_way_id = get_max_way_id(cursor)
+        if not max_node_id or not max_way_id:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not get ids from database", Qgis.Warning, 10
+            )
+            return
+
+        # create nodes, ways and way_nodes data
+        nodes_bd = self.new_segment.create_nodes_bd(max_node_id)
+        ways_bd = self.new_segment.create_ways_bd(max_node_id, max_way_id)
+        way_nodes_bd = self.new_segment.create_way_nodes_bd(max_node_id, max_way_id)
+        if not nodes_bd or not ways_bd or not way_nodes_bd:
+            return
+
+        # insert ways - nodes data to database
+        segment_added = add_segment(connection, cursor,nodes_bd, way_nodes_bd, ways_bd)
+        if not segment_added:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not insert data into database", Qgis.Warning, 10
+            )
+            return
+        
+        # close connection
+        close_connection(connection, cursor)

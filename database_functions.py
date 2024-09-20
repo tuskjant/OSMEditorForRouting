@@ -19,15 +19,15 @@ def connect_to_database(database_params):
         print(e)
         return None, None
 
-
 def close_connection(connection, cursor):
     try:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
         return True
     except:
         return False
-
 
 def change_line_direction(connection, cursor, way_id):
     """Change segment direction:
@@ -134,3 +134,55 @@ def execute_sql_file(connection, cursor, sql_file_path):
         connection.rollback()  
         return False
     return True
+
+def get_max_node_id(cursor):
+    nodes_table = "nodes"
+    # Get nodes
+    try:
+        query_nodes = f"SELECT max(id) as max_id FROM {nodes_table}"
+        cursor.execute(query_nodes)
+        result = cursor.fetchone()
+        if result is None:
+            return False
+        max_id = result[0]
+    except Exception as e:
+        print(e)
+        return False
+    return max_id
+
+def get_max_way_id(cursor):
+    ways_table ="ways"
+    try:
+        query_nodes = f"SELECT max(id) as max_id FROM {ways_table}"
+        cursor.execute(query_nodes)
+        result = cursor.fetchone()
+        if result is None:
+            return False
+        max_id = result[0]
+    except Exception as e:
+        print(e)
+        return False
+    return max_id
+
+def insert_data_into_table(conn, cursor, table_name, data_list):
+    for data in data_list:
+        columns = ', '.join(data.keys())
+        placeholders = ', '.join(['%s'] * len(data))
+        sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+        values = list(data.values())
+
+        cursor.execute(sql, values)
+    
+def add_segment(connection, cursor, nodes_data, way_nodes_data, ways_data):
+    try:
+        insert_data_into_table(connection, cursor, "nodes", nodes_data)
+        insert_data_into_table(connection, cursor, "way_nodes", way_nodes_data)
+        insert_data_into_table(connection, cursor, "ways", ways_data)
+        connection.commit()
+        return True
+
+    except Exception as e:
+        print(e)
+        if connection:
+            connection.rollback()
+        return False
