@@ -45,6 +45,8 @@ from .add_line_functions import *
 
 from .osrm_new_segment import NewSegment
 
+import time
+
 class EditorForRouting:
     """QGIS Plugin Implementation."""
     segment_layer_name = "ways"
@@ -475,11 +477,12 @@ class EditorForRouting:
                 "Warning", "An error occurred while closing database", Qgis.Warning, 10
             )
 
-        # Updata layer display
+        # Updata layer data and display
         ways_layer.triggerRepaint()
 
         # mark feature as edited
         ways_layer = self.check_layer(self.segment_layer_name)
+        selected_features = ways_layer.selectedFeatures()
         ways_layer.startEditing()
         for feature in selected_features:
             osrm_feature = OsrmFeatureData(feature, self.iface)
@@ -886,4 +889,3 @@ class EditorForRouting:
         if ways_layer is not None:
             ways_layer.triggerRepaint()
         self.canvas.refresh()
-

@@ -1,5 +1,5 @@
 import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ_COMMITTED
 
 
 def connect_to_database(database_params):
@@ -38,6 +38,7 @@ def change_line_direction(connection, cursor, way_id):
     ways_table = "ways"
     way_node_table = "way_nodes"
 
+    
     try:
         ### 1- Reverse geometry of linestring
         query_linestring = f"UPDATE {ways_table} SET linestring = ST_Reverse(linestring) WHERE id = %s"
@@ -55,7 +56,7 @@ def change_line_direction(connection, cursor, way_id):
         # Reverse nodes list
         reversed_array = current_array[::-1]
 
-        # Updata nodes field
+        # Update nodes field
         query_update_nodes = f"UPDATE {ways_table} SET nodes = %s WHERE id = %s"
         cursor.execute(query_update_nodes, (reversed_array, way_id))
 
@@ -71,7 +72,7 @@ def change_line_direction(connection, cursor, way_id):
         # Reverse sequence id for rows
         reversed_rows = [(row[0], max_sequence_id - row[1]) for row in rows]
 
-        # Reverse sequence id: delete preveious values and insert new values (avoid restriction)
+        # Reverse sequence id: delete previous values and insert new values (avoid restriction)
         delete_query = f"DELETE FROM {way_node_table} WHERE way_id = %s"
         cursor.execute(delete_query, (way_id,))
 
@@ -80,10 +81,12 @@ def change_line_direction(connection, cursor, way_id):
             cursor.execute(insert_query, (way_id, row[0], row[1]))
         
         connection.commit()
+    
     except Exception as e:
         print(e)
         connection.rollback()
         return False
+    
     return True
 
 def create_db(conn_params):
