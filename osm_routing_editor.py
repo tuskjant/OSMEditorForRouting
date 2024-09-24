@@ -495,7 +495,9 @@ class EditorForRouting:
         return
 
     def undo_segment_changes(self):
-        """Method to undo all previous changes (access or restrict) in segments"""
+        # check if changing direction is needed
+        self.undo_direction()
+
         ways_layer = self.check_layer(self.segment_layer_name)
         selected_features = ways_layer.selectedFeatures()
         if len(selected_features) < 1:
@@ -504,14 +506,55 @@ class EditorForRouting:
             )
             return
 
+        # check if need to change direction
         ways_layer.startEditing()
         for feature in selected_features:
             osrm_feature = OsrmFeatureData(feature, self.iface)
-            osrm_feature.change_edited("undo",None)
+            osrm_feature.change_edited("undo", None)
             ways_layer.updateFeature(osrm_feature.feature)
         ways_layer.commitChanges()
         ways_layer.triggerRepaint()
         self.display_segments()
+
+    def undo_direction(self):
+        # select features
+        ways_layer = self.check_layer(self.segment_layer_name)
+        selected_features = ways_layer.selectedFeatures()
+        if len(selected_features) < 1:
+            self.iface.messageBar().pushMessage(
+                "Error", "There are no selected features", Qgis.Warning, 10
+            )
+            return
+
+        # create connection
+        parameters = self.get_db_parameters()
+        if not parameters:
+            return
+        connection, cursor = connect_to_database(parameters)
+        if connection is None or cursor is None:
+            self.iface.messageBar().pushMessage(
+                "Warning", "Can not connect to database", Qgis.Warning, 10
+            )
+            return
+
+        # change direction if it is reversed
+        for feature in selected_features:
+            osrm_feature = OsrmFeatureData(feature, self.iface)
+            current_direction = osrm_feature.extract_direction()
+            if current_direction == "reversed":
+                # reverse geometry
+                way_id = feature["id"]
+                change_line_direction(connection, cursor, way_id)
+
+        # close connection
+        closed = close_connection(connection, cursor)
+        if not closed:
+            self.iface.messageBar().pushMessage(
+                "Warning", "An error occurred while closing database", Qgis.Warning, 10
+            )
+
+        # Updata layer data and display
+        ways_layer.triggerRepaint()
 
     def display_segments(self):
         """Method to display attributes of selected segments in a table"""

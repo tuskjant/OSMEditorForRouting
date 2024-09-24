@@ -9,25 +9,25 @@ class OsrmFeatureData:
         self.iface = iface
         self.feature = feature
         self.osrm_car_profile = CarProfile()
-        self.tags_value = feature[self.tags_field_name]
+        self.tags_attribute = feature[self.tags_field_name]
         self.id = feature["id"]
-        self.name = self.tags_value["name"] if "name" in self.tags_value.keys() else ""
+        self.name = self.tags_attribute["name"] if "name" in self.tags_attribute.keys() else ""
 
     def get_tags_data(self, data_option):
         if data_option == "access":
-            access = self.tags_value["access"] if "access" in self.tags_value.keys() else None
-            vehicle = self.tags_value["vehicle"] if "vehicle" in self.tags_value.keys() else None
-            motor_vehicle = self.tags_value["motor_vehicle"] if "motor_vehicle" in self.tags_value.keys() else None
-            motor_car = self.tags_value["motor_car"] if "motor_car" in self.tags_value.keys() else None
+            access = self.tags_attribute["access"] if "access" in self.tags_attribute.keys() else None
+            vehicle = self.tags_attribute["vehicle"] if "vehicle" in self.tags_attribute.keys() else None
+            motor_vehicle = self.tags_attribute["motor_vehicle"] if "motor_vehicle" in self.tags_attribute.keys() else None
+            motor_car = self.tags_attribute["motor_car"] if "motor_car" in self.tags_attribute.keys() else None
             return {"access": access, "vehicle": vehicle, "motor_vehicle": motor_vehicle, "motor_car": motor_car}
         elif data_option == "oneway":
-            one_way = self.tags_value["oneway"] if "oneway" in self.tags_value.keys() else None
-            highway = self.tags_value["highway"] if "highway" in self.tags_value.keys() else None
-            junction = self.tags_value["junction"] if "junction" in self.tags_value.keys() else None
+            one_way = self.tags_attribute["oneway"] if "oneway" in self.tags_attribute.keys() else None
+            highway = self.tags_attribute["highway"] if "highway" in self.tags_attribute.keys() else None
+            junction = self.tags_attribute["junction"] if "junction" in self.tags_attribute.keys() else None
             return {"oneway": one_way, "highway": highway, "junction": junction}
         elif data_option == "speed":
-            max_speed = self.tags_value["maxspeed"] if "maxspeed" in self.tags_value.keys() else None
-            highway = self.tags_value["highway"] if "highway" in self.tags_value.keys() else None
+            max_speed = self.tags_attribute["maxspeed"] if "maxspeed" in self.tags_attribute.keys() else None
+            highway = self.tags_attribute["highway"] if "highway" in self.tags_attribute.keys() else None
             return {"maxspeed": max_speed, "highway": highway}
 
     def extract_access_value(self):
@@ -79,13 +79,13 @@ class OsrmFeatureData:
         tags_data = self.get_tags_data("speed")
         highway = tags_data["highway"]
         speeds = self.osrm_car_profile.get_speeds()
-        maxspeed_in_tag = self.get_tag_maxspeed(tags_data["maxspeed"])
+        maxspeed_in_tag = self.get_tag_maxspeed_kmh(tags_data["maxspeed"])
         if maxspeed_in_tag is not None:
             return maxspeed_in_tag
         else:
             return speeds[highway] if highway in speeds.keys() else ""
 
-    def get_tag_maxspeed(self, data):
+    def get_tag_maxspeed_kmh(self, data):
         """Convert values of maxspeed tag into km/h or None"""
         num_pattern = re.compile(r'^(\d+)\s?$')
         mph_pattern = re.compile(r'^(\d+)\s?mph')
@@ -106,9 +106,15 @@ class OsrmFeatureData:
             return None
 
     def extract_edited(self):
-        edited = "yes" if "osrmedited" in self.tags_value.keys() else "no"
+        edited = "yes" if "osrmedited" in self.tags_attribute.keys() else "no"
         return edited
 
+    def extract_direction(self):
+        if "direction" in self.tags_attribute.keys():
+            return self.tags_attribute["direction"]
+        else:
+            return None
+    
     def get_table_row(self):
         return [
             f"{self.id}",
@@ -126,21 +132,21 @@ class OsrmFeatureData:
             if self.extract_access_value() == "no":
                 return # restrict circulation in a segment already restricted
             elif self.extract_access_value() == "yes":
-                self.tags_value["access"] = "no"
+                self.tags_attribute["access"] = "no"
 
         elif option == "allow_access":
             if self.extract_access_value() == "yes":
                 return
             elif self.extract_access_value() == "no":
-                self.tags_value["access"] = "yes"
+                self.tags_attribute["access"] = "yes"
                 if "vehicle" in tags_data.keys() and tags_data["vehicle"] is not None:
-                    del self.tags_value["vehicle"]
+                    del self.tags_attribute["vehicle"]
                 if "motor-vehicle" in tags_data.keys() and tags_data["motor_vehicle"] is not None:
-                    del self.tags_value["motor_vehicle"]
+                    del self.tags_attribute["motor_vehicle"]
                 if "motor-car" in tags_data.keys() and tags_data["motor_car"] is not None:
-                    del self.tags_value["motor_car"]
+                    del self.tags_attribute["motor_car"]
         # Update tags values of feature and save previous values
-        self.feature[self.tags_field_name] = self.tags_value 
+        self.feature[self.tags_field_name] = self.tags_attribute 
         self.change_edited("edit", tags_data)
 
     def change_one_way(self, option):
@@ -151,7 +157,7 @@ class OsrmFeatureData:
             if self.extract_oneway() == "yes":
                 return #oneway in a segment already one way
             elif self.extract_oneway() == "no":
-                self.tags_value["oneway"] ="yes"
+                self.tags_attribute["oneway"] ="yes"
 
         elif option == "bothways":
             if self.extract_oneway() == "no":
@@ -165,13 +171,13 @@ class OsrmFeatureData:
                     return 
                 # case motorway, change to primary
                 elif "highway" in tags_data.keys() and tags_data["highway"] == "motorway":
-                    self.tags_value["highway"] = "primary"
+                    self.tags_attribute["highway"] = "primary"
                 # case tag oneway -> change tag to no
                 if "oneway" in tags_data.keys() and tags_data["oneway"] == "yes":
-                    self.tags_value["oneway"] = "no"
+                    self.tags_attribute["oneway"] = "no"
 
         # Update tags values of feature and save previous values
-        self.feature[self.tags_field_name] = self.tags_value
+        self.feature[self.tags_field_name] = self.tags_attribute
         self.change_edited("edit", tags_data)
 
     def change_speed(self, speed):
@@ -185,7 +191,7 @@ class OsrmFeatureData:
         highway_speed = speeds[highway] if highway in speeds.keys() else ""
 
         # Speed depending on maxspeed tag
-        maxspeed_in_tag = self.get_tag_maxspeed(tags_data["maxspeed"])
+        maxspeed_in_tag = self.get_tag_maxspeed_kmh(tags_data["maxspeed"])
         
         # If selected speed is higher than speed limit for a way, an alert is shown and no changes apply
         if speed > highway_speed:
@@ -194,31 +200,31 @@ class OsrmFeatureData:
                     )
             return 
         else:
-            self.tags_value["maxspeed"] = speed
+            self.tags_attribute["maxspeed"] = speed
 
         # Update tags values of feature and save previous values(only for maxspeed)
         tags_data_speed = {key: tags_data[key] for key in tags_data if key == "maxspeed"}
-        self.feature[self.tags_field_name] = self.tags_value
+        self.feature[self.tags_field_name] = self.tags_attribute
         self.change_edited("edit", tags_data_speed)
 
     def change_direction(self):
-        direction = (self.tags_value["direction"] if "direction" in self.tags_value.keys() else None)
-        tags_data = {"direction": direction}
+        current_direction_tag = (self.tags_attribute["direction"] if "direction" in self.tags_attribute.keys() else None)
+        tags_data = {"direction": current_direction_tag}
 
         if tags_data["direction"] == "reversed":
-            self.tags_value["direction"] = "normal"
-        else:
-            self.tags_value["direction"] = "reversed"
+            self.tags_attribute["direction"] = "normal"
+        else: #case current is normal or none
+            self.tags_attribute["direction"] = "reversed"
 
         # Update tags values of feature and save previous values
-        self.feature[self.tags_field_name] = self.tags_value
+        self.feature[self.tags_field_name] = self.tags_attribute
         self.change_edited("edit", tags_data)
 
-    def osrmedited_to_string(self, data_dict):
+    def tag_osrmedited_to_string(self, data_dict):
         data_string = "|".join([f"{k}=>NULL" if v is None else f"{k}=>{v}" for k, v in data_dict.items()])
         return data_string
 
-    def osrmedited_to_dict(self, data_string):
+    def tag_osrmedited_to_dict(self, data_string):
         edited_data_dict = {}
         for pair in data_string.split('|'):
             key, value = pair.split('=>')
@@ -228,9 +234,9 @@ class OsrmFeatureData:
     def change_edited(self, option, data):
         """Edit or undo edition of segment, option must be 'edit' or 'undo'"""
         # Get previous values of edited data from osrmedited tag
-        edited_data = self.tags_value["osrmedited"] if "osrmedited" in self.tags_value.keys() else None
+        edited_data = self.tags_attribute["osrmedited"] if "osrmedited" in self.tags_attribute.keys() else None
         if edited_data:
-            edited_data_dict = self.osrmedited_to_dict(edited_data)
+            edited_data_dict = self.tag_osrmedited_to_dict(edited_data)
         else:
             edited_data_dict = None
 
@@ -242,10 +248,10 @@ class OsrmFeatureData:
                 for tag in data.keys():
                     if tag not in edited_data_dict.keys():
                         edited_data_dict[tag] = data[tag]
-                self.tags_value["osrmedited"] = self.osrmedited_to_string(edited_data_dict)
+                self.tags_attribute["osrmedited"] = self.tag_osrmedited_to_string(edited_data_dict)
             else:
-                data_string = self.osrmedited_to_string(data)
-                self.tags_value["osrmedited"] = data_string
+                data_string = self.tag_osrmedited_to_string(data)
+                self.tags_attribute["osrmedited"] = data_string
 
         # When option is undo:
         # ╠  if it has been edited before -> recover values from osrmedited tag
@@ -254,14 +260,15 @@ class OsrmFeatureData:
             if edited_data_dict:
                 for tag in edited_data_dict.keys():
                     if edited_data_dict[tag] is not None:  # Recover in case there was a value before
-                        self.tags_value[tag] = edited_data_dict[tag]
+                        self.tags_attribute[tag] = edited_data_dict[tag]
                     else:   #delete current tag in case no previous value exist
-                        if tag in self.tags_value.keys():
-                            del self.tags_value[tag]
-                del self.tags_value["osrmedited"]
+                        if tag in self.tags_attribute.keys():
+                            del self.tags_attribute[tag]
+                del self.tags_attribute["osrmedited"]
             else:
                 # no previously data edited, nothing to do
                 pass
 
         # Update tags values of feature
-        self.feature[self.tags_field_name] = self.tags_value
+        self.feature[self.tags_field_name] = self.tags_attribute
+
