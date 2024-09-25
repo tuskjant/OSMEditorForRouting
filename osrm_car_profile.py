@@ -2,7 +2,7 @@ import re
 import os
 
 class CarProfile:
-    lua_file = os.path.join(os.path.dirname(__file__), "car.lua")
+    lua_file = os.path.join(os.path.dirname(__file__), "osrm_profile\car.lua")
 
     def __init__(self):
         with open(self.lua_file, 'r') as file:

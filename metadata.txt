@@ -10,7 +10,7 @@ version=0.1
 author=Gemma Riu
 email=gemmariup@gmail.com
 
-about=This plugin allows editing an OSM layer to modify the attributes used in the creation of the graph for routing.
+about=This plugin allows preparing and modifying OSM data to be used in the OSRM routing server. It enables changing attributes used in the creation of the graph and the creation of new graph segments. Conversion of OSM data to graph.
 
 tracker=https://github.com/tuskjant/OSMEditorForRouting/issues
 repository=https://github.com/tuskjant/OSMEditorForRouting

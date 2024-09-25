@@ -51,8 +51,8 @@ class EditorForRouting:
     """QGIS Plugin Implementation."""
     segment_layer_name = "ways"
     tags_field_name = "tags"
-    ways_style_file = "ways_style.qml"
-    ways_temp_style_file = "ways_temp.qml"
+    ways_style_file = "qgis_styles\ways_style.qml"
+    ways_temp_style_file = "qgis_styles\ways_temp.qml"
 
     def __init__(self, iface):
         """Constructor.
