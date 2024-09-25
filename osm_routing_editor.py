@@ -34,16 +34,14 @@ from .osm_routing_editor_dialog import EditorForRoutingDialog
 import os.path
 # tool for select feature
 from .select_feature_tool import SelectFeatureTool
-# subprocess to execute cmd commands
-import subprocess
 # osrm feature data to edit features
 from .osrm_feature_data import OsrmFeatureData
 # database funcions
 from .database_functions import *
 # tool to create new line
 from .add_line_functions import *
-
 from .osrm_new_segment import NewSegment
+from .data_handler import DataHandler
 
 import time
 
@@ -580,14 +578,6 @@ class EditorForRouting:
         self.tableView.setModel(model)
         self.tableView.setColumnWidth(1, 200)
 
-    def run_command(self, command):
-        """Method to run a subprocess for pbf generation"""
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        stdout = stdout.decode('cp1252')
-        stderr = stderr.decode('cp1252')
-        return stdout, stderr
-
     def convert_to_pbf(self):
         """Method for exporting from database to pbf files"""
         pbf_folder = self.get_pbf_folder()
@@ -595,102 +585,28 @@ class EditorForRouting:
         if not pbf_folder or not osmosis_folder:
             return
 
-        self.host = self.dlg.lineEditHost.text()
-        self.port = self.dlg.lineEditPort.text()
-        self.user = self.dlg.lineEditUser.text()
-        self.password = self.dlg.lineEditPassword.text()
-        self.database = self.dlg.lineEditDB.text()
-        self.schema = self.dlg.lineEditSchema.text()
-
-        if self.database is not None and self.user is not None and self.password is not None:
-            try: 
-                command = f'cd /d "{osmosis_folder}" && osmosis --read-pgsql host={self.host} database={self.database} user={self.user} password={self.password} postgresSchema={self.schema} --dataset-dump --write-pbf file={os.path.join(pbf_folder,"output.osm.pbf")}'
-
-                stdout, stderr = self.run_command(command)
-                print("Salida", stdout)
-                print("Errores", stderr)
-                self.iface.messageBar().pushMessage(
-                    "Info", "Database converted to pbf file", Qgis.Success, 10
-                )
-            except:
-                self.iface.messageBar().pushMessage(
-                    "Error", "An error ocurred while converting to pbf", Qgis.Warning, 10
-                )
-        else:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Missing database parameters in settings", Qgis.Warning, 10
-            )
+        dbparameters = self.get_db_parameters()
+        if not dbparameters:
             return
+
+        osrm_data_handler = DataHandler(self.iface)
+        osrm_data_handler.convert_to_pbf(dbparameters, pbf_folder, osmosis_folder)
 
     def load_pbf(self):
         # Try to create new db using settings
         parameters = self.get_db_parameters()
-        db_created = create_db(parameters)
-        if not db_created:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Can not create the database", Qgis.Warning, 10
-            )
+        if not parameters:
             return
 
-        # Connect to database
-        connection, cursor = connect_to_database(parameters)
-        if connection is None or cursor is None:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Can not connect to the database", Qgis.Warning, 10
-            )
+        osmosis_folder = self.get_osmosis_folder()
+        if not osmosis_folder:
             return
-
-        # Create extensions
-        extension_created = create_extensions(connection, cursor)
-        if not extension_created:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Can not create extensions", Qgis.Warning, 10
-            )
-            return
-
-        # Get osmosis script path
-        osmosis_bin_folder = self.get_osmosis_folder()
-        if not osmosis_bin_folder:
-            return
-        osmosis_path = os.path.dirname(osmosis_bin_folder)
-        osmosis_script_path = os.path.join(osmosis_path,"script")
-
-        # Create database schema and tables
-        schema_script = os.path.join(osmosis_script_path,"pgsnapshot_schema_0.6.sql")
-        schema_executed = execute_sql_file(connection, cursor, schema_script)
-        if not schema_executed:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Can not create database schema and tables", Qgis.Warning, 10
-            )
-            return
-
-        # Add geometry
-        bbox_script = os.path.join(osmosis_script_path, "pgsnapshot_schema_0.6_bbox.sql")
-        line_script = os.path.join(osmosis_script_path, "pgsnapshot_schema_0.6_linestring.sql")
-        bbox_executed = execute_sql_file(connection, cursor, bbox_script)
-        line_executed = execute_sql_file(connection, cursor, line_script)
-        if not bbox_executed or not line_executed:
-            self.iface.messageBar().pushMessage(
-                "Warning", "Can not create geometry in tables", Qgis.Warning, 10
-            )
-            return
-
-        # Execute osmosis pbf -> pgsql
         pbf_file = self.get_pbf_file()
         if not pbf_file:
             return
-        try: 
-            command = f'cd /d "{osmosis_bin_folder}" && osmosis --read-pbf "{pbf_file}" --write-pgsql host={self.host} database={self.database} user={self.user} password={self.password} postgresSchema={self.schema}'
-            stdout, stderr = self.run_command(command)
-            print("Salida", stdout)
-            print("Errores", stderr)
-            self.iface.messageBar().pushMessage(
-                "Info", "Pbf file loaded to database", Qgis.Success, 10
-            )
-        except:
-            self.iface.messageBar().pushMessage(
-                "Error", "An error ocurred while loading pbf file", Qgis.Warning, 10
-            )
+
+        osrm_data_handler = DataHandler(self.iface)
+        osrm_data_handler.load_pbf(parameters,pbf_file,osmosis_folder)
 
     def close(self):
         self.perform_cleanup()
