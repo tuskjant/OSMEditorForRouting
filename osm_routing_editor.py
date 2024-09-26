@@ -881,16 +881,24 @@ class EditorForRouting:
                 "Warning", "Can not get ids from database", Qgis.Warning, 10
             )
             return
+        
+        # get osrm_user from db
+        user_in_db = get_osrm_user_from_db(cursor)
 
-        # create nodes, ways and way_nodes data
+        # create nodes, ways,way_nodes and user data
         nodes_bd = self.new_segment.create_nodes_bd(max_node_id)
         ways_bd = self.new_segment.create_ways_bd(max_node_id, max_way_id)
         way_nodes_bd = self.new_segment.create_way_nodes_bd(max_node_id, max_way_id)
+        if user_in_db == "nouser":    #add user to database in case it not exist
+            user_bd = self.new_segment.create_user_bd()
+        else:
+            user_bd = None
+            
         if not nodes_bd or not ways_bd or not way_nodes_bd:
             return
 
         # insert ways - nodes data to database
-        segment_added = add_segment(connection, cursor,nodes_bd, way_nodes_bd, ways_bd)
+        segment_added = add_segment(connection, cursor,nodes_bd, way_nodes_bd, ways_bd, user_bd)
         if not segment_added:
             self.iface.messageBar().pushMessage(
                 "Warning", "Can not insert data into database", Qgis.Warning, 10

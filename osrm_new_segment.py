@@ -115,3 +115,10 @@ class NewSegment:
 
         ways_bd.append(attributes)
         return ways_bd
+
+    def create_user_bd(self):
+        user_bd = []
+        osrm_user = {"id": 99999999,
+                     "name": "osrm_editor"}
+        user_bd.append(osrm_user)
+        return user_bd

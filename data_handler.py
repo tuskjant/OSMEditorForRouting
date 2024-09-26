@@ -34,7 +34,6 @@ class DataHandler:
         ):
             try:
                 command = f'cd /d "{osmosis_folder}" && osmosis --read-pgsql host={host} database={database} user={user} password={password} postgresSchema={schema} --dataset-dump --write-pbf file={os.path.join(pbf_folder,"output.osm.pbf")}'
-
                 stdout, stderr = self.run_command(command)
                 print("Output", stdout)
                 print("Errors", stderr)
@@ -161,7 +160,6 @@ class DataHandler:
                 f'"{docker_path}" run -t -v "{osrm_data_folder}":/data {osrm_docker_image} osrm-partition /data/{name2_pbf}.osrm && '
                 f'"{docker_path}" run -t -v "{osrm_data_folder}":/data {osrm_docker_image} osrm-customize /data/{name2_pbf}.osrm'
             )
-            print(command)
             stdout, stderr = self.run_command(command)
             print("Output", stdout)
             print("Errors", stderr)

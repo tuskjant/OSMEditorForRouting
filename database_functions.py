@@ -167,6 +167,20 @@ def get_max_way_id(cursor):
         return False
     return max_id
 
+def get_osrm_user_from_db(cursor):
+    users_table = "users"
+    try:
+        query_user = f"SELECT id, name FROM {users_table} WHERE id=99999999"
+        cursor.execute(query_user)
+        result = cursor.fetchone()
+        if result is None:
+            return "nouser"
+        else:
+            return "user"
+    except Exception as e:
+        print(e)
+        return False 
+
 def insert_data_into_table(conn, cursor, table_name, data_list):
     for data in data_list:
         columns = ', '.join(data.keys())
@@ -176,11 +190,14 @@ def insert_data_into_table(conn, cursor, table_name, data_list):
 
         cursor.execute(sql, values)
     
-def add_segment(connection, cursor, nodes_data, way_nodes_data, ways_data):
+def add_segment(connection, cursor, nodes_data, way_nodes_data, ways_data, user_data):
+    # insert user_data only when there's not user in the database
     try:
         insert_data_into_table(connection, cursor, "nodes", nodes_data)
         insert_data_into_table(connection, cursor, "way_nodes", way_nodes_data)
         insert_data_into_table(connection, cursor, "ways", ways_data)
+        if user_data:
+            insert_data_into_table(connection, cursor, "users", user_data)
         connection.commit()
         return True
 
