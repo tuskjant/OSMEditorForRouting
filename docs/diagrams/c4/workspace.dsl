@@ -7,6 +7,7 @@ workspace "GIS Integral de Transport" {
 		group "GIS Integral de transport" {
 			routeplanner = person "Route Planner" "User that wants to calculate car routes between points" "routeplanner"
 			networkmaintenance = person "Network maintenance operator" "User that edits the road network" "networkmaintenance"
+			osrm = softwareSystem "Open Source Routing Machine OSRM" "Routing engine server for shortest paths in road networks." "External"
 		
 			viewer = softwareSystem "GIS Integral de Transport Viewer" "Allows users to find the best route by car between 2 or more points" "viewer"{
 				APIICGC = container "API Geocoder ICGC" "Provides forward and reverse geocoding services" "" "External"
@@ -23,12 +24,17 @@ workspace "GIS Integral de Transport" {
 			
 			editor = softwareSystem "GIS Integral de Transport Editor" "Allows editors to modify and prepare road network data. Serves routing data." "editor" {
 				database = container "Database" "Stores OpenStreetMap data (ways, nodes and relations)." "PostgreSQL - PostGIS" "Database"
-				osmosis = container "Osmosis" "Processes OSM data, reading/writing databases and files." "External" ""
-				osrm = container "Open Source Routing Machine OSRM" "Routing engine server for shortest paths in road networks." "" "External"
+				osmosis = container "Osmosis" "Processes OSM data, reading/writing databases and files." "" "External"			
 				group "QGIS Software System"{
 					qgiscore = container "QGIS core" "Geographic Information System Software that allows view and edit vector layers" "" "External"
 					osrmeditor = container "OSRM editor plugin" "A plugin that processes, converts, and modifies OSM data for use with OSRM" "Python, pyqgis" {
-
+						UI = component "UI" "Provides the graphical user interface for the QGIS plugin" "Python,pyqgis, Qt"
+						datahandler = component "Data handler" "Import, export, and convert OSM data into various formats using Osmosis and OSRM" "Python, pyqgis"
+						selectfeaturetool = component "Select feature tool" "Tool for selecting segments from ways layer" "Pyqgis"
+						wayfeaturehandler = component "Way feature handler" "Handles operations related to existing way features: extract feature data, updating attributes and modify geometry" "Python, pyqgis"
+						newsegmenthandler = component "New segment handler" "Handles operations to create, modify and update new way features" "Python, pyqgis"
+						databasefunctions = component "Data access component" "Manage all interactions with the database: quering, inserting, updating and deleting data" "Python"
+						routingeditorcomp = component "Routing editor" "Responsible for managing and executing the core data processing logic" "Python, pyqgis"
 					}
 				}
 			}
@@ -36,7 +42,6 @@ workspace "GIS Integral de Transport" {
 
 		#relationships between people and software systems
 		routeplanner -> viewer "Uses"
-		viewer -> editor "Gets routing data"
 		networkmaintenance -> editor "Edits 
 		
 		#relationships to/from containers
@@ -63,6 +68,17 @@ workspace "GIS Integral de Transport" {
 		geocodercomponent -> leafletroutecontroller "Uses"
 		leafletroutecontroller -> leafletmap "Uses"
 		leafletmap -> OSMData "Makes API calls" "PNG/HTTPS"
+
+		UI -> routingeditorcomp "Uses"
+		routingeditorcomp -> datahandler "Uses"
+		routingeditorcomp -> selectfeaturetool "Uses"
+		routingeditorcomp -> wayfeaturehandler "Uses"
+		routingeditorcomp -> newsegmenthandler "Uses"
+		routingeditorcomp -> databasefunctions "Uses"
+		newsegmenthandler -> databasefunctions "Uses"
+		databasefunctions -> database "Reads from and writes to"
+		datahandler -> osmosis "Makes calls"
+		datahandler -> osrm "Makes calls"
 	}
 	
 	views {
@@ -106,7 +122,22 @@ workspace "GIS Integral de Transport" {
 				leafletmap
 			}
 			autolayout
-			description "Componets diagram for GIS Integral de Transport Viewer container"
+			description "Components diagram for GIS Integral de Transport Viewer"
+		}
+
+		component osrmeditor "EditorComponents" {
+			include *
+			animation {
+				UI
+				routingeditorcomp
+				datahandler
+				selectfeaturetool
+				wayfeaturehandler
+				newsegmenthandler
+				databasefunctions
+			}
+			autolayout
+			description "Components diagram for GIS Integral de Transport Editor"
 		}
 		
 		
