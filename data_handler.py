@@ -36,8 +36,8 @@ class DataHandler:
                 command = f'cd /d "{osmosis_folder}" && osmosis --read-pgsql host={host} database={database} user={user} password={password} postgresSchema={schema} --dataset-dump --write-pbf file={os.path.join(pbf_folder,"output.osm.pbf")}'
 
                 stdout, stderr = self.run_command(command)
-                print("Salida", stdout)
-                print("Errores", stderr)
+                print("Output", stdout)
+                print("Errors", stderr)
                 self.iface.messageBar().pushMessage(
                     "Info", "Database converted to pbf file", Qgis.Success, 10
                 )
@@ -122,8 +122,8 @@ class DataHandler:
         try:
             command = f'cd /d "{osmosis_bin_folder}" && osmosis --read-pbf "{pbf_file}" --write-pgsql host={host} database={database} user={user} password={password} postgresSchema={schema}'
             stdout, stderr = self.run_command(command)
-            print("Salida", stdout)
-            print("Errores", stderr)
+            print("Output", stdout)
+            print("Errors", stderr)
             self.iface.messageBar().pushMessage(
                 "Info", "Pbf file loaded to database", Qgis.Success, 10
             )
@@ -131,3 +131,49 @@ class DataHandler:
             self.iface.messageBar().pushMessage(
                 "Error", "An error ocurred while loading pbf file", Qgis.Warning, 10
             )
+
+    def convert_osm_to_pbf(self, osm_file, pbf_folder, osmosis_folder):
+        new_pbf_file_name = os.path.splitext(os.path.basename(osm_file))[0] + ".osm.pbf"
+        try:
+            command = f'cd /d "{osmosis_folder}" && osmosis --read-xml {osm_file} --write-pbf file={os.path.join(pbf_folder, new_pbf_file_name)}'
+
+            stdout, stderr = self.run_command(command)
+            print("Output", stdout)
+            print("Errors", stderr)
+            self.iface.messageBar().pushMessage(
+                "Info", "osm file converted to pbf file", Qgis.Success, 10
+            )
+        except:
+            self.iface.messageBar().pushMessage(
+                "Error",
+                "An error ocurred while converting to pbf",
+                Qgis.Warning,
+                10,
+            )
+
+    def prepare_osrm_data(self, pbf_file, docker_path, osrm_docker_image):
+        name_pbf = os.path.splitext(os.path.basename(pbf_file))[0]
+        name2_pbf = os.path.splitext(os.path.basename(name_pbf))[0]  # double extension .osm.pbf
+        osrm_data_folder = os.path.dirname(pbf_file)
+        try:
+            command = (
+                f'"{docker_path}" run -t -v "{osrm_data_folder}":/data {osrm_docker_image} osrm-extract -p /opt/car.lua /data/{name_pbf}.pbf && '
+                f'"{docker_path}" run -t -v "{osrm_data_folder}":/data {osrm_docker_image} osrm-partition /data/{name2_pbf}.osrm && '
+                f'"{docker_path}" run -t -v "{osrm_data_folder}":/data {osrm_docker_image} osrm-customize /data/{name2_pbf}.osrm'
+            )
+            print(command)
+            stdout, stderr = self.run_command(command)
+            print("Output", stdout)
+            print("Errors", stderr)
+            self.iface.messageBar().pushMessage(
+                "Info", "Osrm files created", Qgis.Success, 10
+            )
+        except:
+            self.iface.messageBar().pushMessage(
+                "Error",
+                "An error ocurred while preparing osrm files",
+                Qgis.Warning,
+                10,
+            )
+
+    

@@ -239,6 +239,8 @@ class EditorForRouting:
             self.dlg.pushButton_addSegment.clicked.connect(self.add_segment)
             self.dlg.pushButtonToPbf.clicked.connect(self.convert_to_pbf)
             self.dlg.pushButtonLoadPbf.clicked.connect(self.load_pbf)
+            self.dlg.pushButtonOsm2Pbf.clicked.connect(self.convert_osm_to_pbf)
+            self.dlg.pushButtonPrepareData.clicked.connect(self.prepare_osrm_data)
             self.dlg.pushButtonRoadType.clicked.connect(self.ns_change_road_type)
             self.dlg.pushButton_direction.clicked.connect(self.ns_change_direction)
             self.dlg.pushButton_SpeedLimit.clicked.connect(self.ns_change_speed)
@@ -592,6 +594,16 @@ class EditorForRouting:
         osrm_data_handler = DataHandler(self.iface)
         osrm_data_handler.convert_to_pbf(dbparameters, pbf_folder, osmosis_folder)
 
+    def convert_osm_to_pbf(self):
+        pbf_folder = self.get_pbf_folder()
+        osm_file = self.get_osm_file()
+        osmosis_folder = self.get_osmosis_folder()
+        if not pbf_folder or not osmosis_folder or not osm_file:
+            return
+
+        osrm_data_handler = DataHandler(self.iface)
+        osrm_data_handler.convert_osm_to_pbf(osm_file, pbf_folder, osmosis_folder)
+
     def load_pbf(self):
         # Try to create new db using settings
         parameters = self.get_db_parameters()
@@ -607,6 +619,16 @@ class EditorForRouting:
 
         osrm_data_handler = DataHandler(self.iface)
         osrm_data_handler.load_pbf(parameters,pbf_file,osmosis_folder)
+
+    def prepare_osrm_data(self):
+        input_pbf = self.get_pbf_file()
+        osrm_docker_image = self.get_osrm_docker_image()
+        docker_path = self.get_docker_path()
+        if not input_pbf or not osrm_docker_image or not docker_path:
+            return
+
+        osrm_data_handler = DataHandler(self.iface)
+        osrm_data_handler.prepare_osrm_data(input_pbf, docker_path, osrm_docker_image)
 
     def close(self):
         self.perform_cleanup()
@@ -682,6 +704,42 @@ class EditorForRouting:
             )
             return False
         return pbf_file
+
+    def get_osm_file(self):
+        osm_file = self.dlg.mQgsFileWidget_osmfile.filePath()
+        if osm_file is None:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "Missing input osm file in settings",
+                Qgis.Warning,
+                10,
+            )
+            return False
+        return osm_file
+
+    def get_osrm_docker_image(self):
+        osrm_docker_image = self.dlg.lineEdit_docker.text()
+        if not osrm_docker_image:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "Missing osrm docker image in settings",
+                Qgis.Warning,
+                10,
+            )
+            return False
+        return osrm_docker_image
+
+    def get_docker_path(self):
+        docker_path = self.dlg.mQgsFileWidget_docker.filePath()
+        if docker_path is None:
+            self.iface.messageBar().pushMessage(
+                "Warning",
+                "Missing docker file",
+                Qgis.Warning,
+                10,
+            )
+            return False
+        return docker_path
 
     def add_segment(self):
         # Create temporary layer

@@ -9,8 +9,8 @@ workspace "GIS Integral de Transport" {
 			networkmaintenance = person "Network maintenance operator" "User that edits the road network" "networkmaintenance"
 		
 			viewer = softwareSystem "GIS Integral de Transport Viewer" "Allows users to find the best route by car between 2 or more points" "viewer"{
-				APIICGC = container "API Geocoder ICGC" "Provides forward and reverse geocoding services" "External" "External"
-				OSMData = container "OSM Tile server" "OpenStreetMap tile map server. Provides map tiles" "External" "External"
+				APIICGC = container "API Geocoder ICGC" "Provides forward and reverse geocoding services" "" "External"
+				OSMData = container "OSM Tile server" "OpenStreetMap tile map server. Provides map tiles" "" "External"
 				viewercontainer = container "GIS Integral de Transport Viewer" "Provides routing functionality and map display" "Typescript, Leaflet" {
 					routingservice = component "Routing Service" "Gets routing data using the OSRM API" "Typescript"
 					geocodingservice = component "Geocoding Service" "Gets forward or reverse geocoding data using the ICGC API" "Typescript"
@@ -23,10 +23,10 @@ workspace "GIS Integral de Transport" {
 			
 			editor = softwareSystem "GIS Integral de Transport Editor" "Allows editors to modify and prepare road network data. Serves routing data." "editor" {
 				database = container "Database" "Stores OpenStreetMap data (ways, nodes and relations)." "PostgreSQL - PostGIS" "Database"
-				osmosis = container "Osmosis" "Processes OSM data, reading/writing databases and files." "External" "External"
-				osrm = container "Open Source Routing Machine OSRM" "Routing engine server for shortest paths in road networks." "External" "External"
+				osmosis = container "Osmosis" "Processes OSM data, reading/writing databases and files." "External" ""
+				osrm = container "Open Source Routing Machine OSRM" "Routing engine server for shortest paths in road networks." "" "External"
 				group "QGIS Software System"{
-					qgiscore = container "QGIS core" "Geographic Information System Software that allows view and edit vector layers" "External" "External"
+					qgiscore = container "QGIS core" "Geographic Information System Software that allows view and edit vector layers" "" "External"
 					osrmeditor = container "OSRM editor plugin" "A plugin that processes, converts, and modifies OSM data for use with OSRM" "Python, pyqgis" {
 
 					}

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>3</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -32,20 +32,20 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>220</y>
-       <width>491</width>
-       <height>151</height>
+       <x>10</x>
+       <y>100</y>
+       <width>711</width>
+       <height>111</height>
       </rect>
      </property>
      <property name="title">
-      <string>Import export data</string>
+      <string>Import export data Osmosis</string>
      </property>
      <widget class="QPushButton" name="pushButtonLoadPbf">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>70</y>
+        <x>240</x>
+        <y>50</y>
         <width>201</width>
         <height>28</height>
        </rect>
@@ -57,24 +57,37 @@
      <widget class="QPushButton" name="pushButtonToPbf">
       <property name="geometry">
        <rect>
-        <x>260</x>
-        <y>70</y>
+        <x>470</x>
+        <y>50</y>
         <width>201</width>
         <height>28</height>
        </rect>
       </property>
       <property name="text">
-       <string>Export to pbf</string>
+       <string>Export from db to pbf</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonOsm2Pbf">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>50</y>
+        <width>201</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Convert osm to pbf</string>
       </property>
      </widget>
     </widget>
     <widget class="QGroupBox" name="groupBox_4">
      <property name="geometry">
       <rect>
-       <x>19</x>
-       <y>39</y>
-       <width>261</width>
-       <height>121</height>
+       <x>10</x>
+       <y>10</y>
+       <width>711</width>
+       <height>81</height>
       </rect>
      </property>
      <property name="title">
@@ -83,8 +96,8 @@
      <widget class="QPushButton" name="pushButtonAddLayers">
       <property name="geometry">
        <rect>
-        <x>40</x>
-        <y>50</y>
+        <x>20</x>
+        <y>30</y>
         <width>141</width>
         <height>28</height>
        </rect>
@@ -94,8 +107,35 @@
       </property>
      </widget>
     </widget>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="geometry">
+      <rect>
+       <x>9</x>
+       <y>229</y>
+       <width>711</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>OSRM</string>
+     </property>
+     <widget class="QPushButton" name="pushButtonPrepareData">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>201</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Prepare data</string>
+      </property>
+     </widget>
+    </widget>
     <zorder>groupBox_4</zorder>
     <zorder>groupBox_2</zorder>
+    <zorder>groupBox_5</zorder>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -153,7 +193,7 @@
       <string>Undo Changes</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -248,7 +288,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>20</x>
@@ -304,7 +344,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>610</x>
@@ -335,68 +375,13 @@
     <attribute name="title">
      <string>Settings</string>
     </attribute>
-    <widget class="QLabel" name="label_2">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>220</y>
-       <width>181</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Osmosis utility (bin folder):</string>
-     </property>
-    </widget>
-    <widget class="QgsFileWidget" name="mQgsFileWidgetOsmosis">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>220</y>
-       <width>241</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="cursor">
-      <cursorShape>ArrowCursor</cursorShape>
-     </property>
-     <property name="storageMode">
-      <enum>QgsFileWidget::GetDirectory</enum>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_4">
-     <property name="geometry">
-      <rect>
-       <x>30</x>
-       <y>270</y>
-       <width>141</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Output OSM pbf folder:</string>
-     </property>
-    </widget>
-    <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFolder">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>270</y>
-       <width>241</width>
-       <height>27</height>
-      </rect>
-     </property>
-     <property name="storageMode">
-      <enum>QgsFileWidget::GetDirectory</enum>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>20</y>
+       <y>10</y>
        <width>681</width>
-       <height>161</height>
+       <height>131</height>
       </rect>
      </property>
      <property name="title">
@@ -419,7 +404,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>70</y>
+        <y>60</y>
         <width>55</width>
         <height>16</height>
        </rect>
@@ -432,7 +417,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>110</y>
+        <y>90</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -445,7 +430,7 @@
       <property name="geometry">
        <rect>
         <x>370</x>
-        <y>110</y>
+        <y>90</y>
         <width>61</width>
         <height>16</height>
        </rect>
@@ -471,7 +456,7 @@
       <property name="geometry">
        <rect>
         <x>370</x>
-        <y>70</y>
+        <y>60</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -494,7 +479,7 @@
       <property name="geometry">
        <rect>
         <x>110</x>
-        <y>70</y>
+        <y>60</y>
         <width>71</width>
         <height>22</height>
        </rect>
@@ -504,7 +489,7 @@
       <property name="geometry">
        <rect>
         <x>110</x>
-        <y>110</y>
+        <y>90</y>
         <width>151</width>
         <height>22</height>
        </rect>
@@ -524,7 +509,7 @@
       <property name="geometry">
        <rect>
         <x>450</x>
-        <y>70</y>
+        <y>60</y>
         <width>181</width>
         <height>22</height>
        </rect>
@@ -537,36 +522,175 @@
       <property name="geometry">
        <rect>
         <x>450</x>
-        <y>110</y>
+        <y>90</y>
         <width>181</width>
         <height>22</height>
        </rect>
       </property>
      </widget>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QGroupBox" name="groupBox_6">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>320</y>
-       <width>151</width>
-       <height>16</height>
+       <x>10</x>
+       <y>150</y>
+       <width>681</width>
+       <height>231</height>
       </rect>
      </property>
-     <property name="text">
-      <string>Input OSM pbf file:</string>
+     <property name="title">
+      <string>Data management</string>
      </property>
+     <widget class="QgsFileWidget" name="mQgsFileWidgetOsmosis">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>30</y>
+        <width>241</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="storageMode">
+       <enum>QgsFileWidget::GetDirectory</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>160</y>
+        <width>151</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Input OSM pbf file:</string>
+      </property>
+     </widget>
+     <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFile">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>150</y>
+        <width>241</width>
+        <height>41</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>130</y>
+        <width>141</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Output OSM pbf folder:</string>
+      </property>
+     </widget>
+     <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFolder">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>120</y>
+        <width>241</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="storageMode">
+       <enum>QgsFileWidget::GetDirectory</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>30</y>
+        <width>181</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Osmosis utility (bin folder):</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_10">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>60</y>
+        <width>151</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>OSRM docker image:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_docker">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>60</y>
+        <width>351</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_11">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>190</y>
+        <width>131</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Input OSM osm file:</string>
+      </property>
+     </widget>
+     <widget class="QgsFileWidget" name="mQgsFileWidget_osmfile">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>180</y>
+        <width>241</width>
+        <height>41</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QgsFileWidget" name="mQgsFileWidget_docker">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>90</y>
+        <width>391</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_12">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>90</y>
+        <width>91</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Docker file:</string>
+      </property>
+     </widget>
     </widget>
-    <widget class="QgsFileWidget" name="mQgsFileWidget_pbfFile">
-     <property name="geometry">
-      <rect>
-       <x>210</x>
-       <y>320</y>
-       <width>241</width>
-       <height>27</height>
-      </rect>
-     </property>
-    </widget>
+    <zorder>groupBox_6</zorder>
+    <zorder>groupBox</zorder>
    </widget>
   </widget>
   <widget class="QDialogButtonBox" name="button_box">
