@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab_3">
     <attribute name="title">
@@ -298,39 +298,12 @@
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QPushButton" name="pushButtonRoadType">
-        <property name="text">
-         <string>Set Road type</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="pushButton_direction">
-        <property name="text">
-         <string>Set Direction of traffic</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="pushButton_SpeedLimit">
         <property name="text">
          <string>Set Speed limit</string>
         </property>
        </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="pushButton_Reverse">
-        <property name="text">
-         <string>Reverse direction</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QComboBox" name="comboBoxRoadType"/>
-      </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="comboBox_direction"/>
       </item>
       <item row="1" column="2">
        <widget class="QSpinBox" name="spinBoxSpeed_2">
@@ -339,6 +312,26 @@
         </property>
         <property name="singleStep">
          <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="comboBox_direction"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="pushButton_direction">
+        <property name="text">
+         <string>Set Direction of traffic</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QComboBox" name="comboBoxRoadType"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushButtonRoadType">
+        <property name="text">
+         <string>Set Road type</string>
         </property>
        </widget>
       </item>

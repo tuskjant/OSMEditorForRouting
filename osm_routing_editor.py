@@ -244,7 +244,6 @@ class EditorForRouting:
             self.dlg.pushButtonRoadType.clicked.connect(self.ns_change_road_type)
             self.dlg.pushButton_direction.clicked.connect(self.ns_change_direction)
             self.dlg.pushButton_SpeedLimit.clicked.connect(self.ns_change_speed)
-            self.dlg.pushButton_Reverse.clicked.connect(self.ns_reverse)
             self.dlg.pushButtonDelete.clicked.connect(self.ns_delete_segment)
             self.dlg.pushButton_create.clicked.connect(self.ns_create_segment_db)
             self.dlg.button_box.clicked.connect(self.close)
@@ -844,12 +843,6 @@ class EditorForRouting:
         maxspeed = str(self.dlg.spinBoxSpeed_2.value())
         self.new_segment.max_speed = maxspeed
         self.display_new_segments(self.new_segment.get_table_data())
-
-    def ns_reverse(self):
-        if not self.check_new_segment():
-            return
-        reverse_line_direction_in_place(self.temp_layer)
-        self.new_segment.geometry = NewSegment.extract_geometry(None, self.temp_layer)
 
     def ns_delete_segment(self):
         self.clear_new_segment_table()
