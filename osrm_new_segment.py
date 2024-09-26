@@ -51,7 +51,7 @@ class NewSegment:
         return attributes
 
     def extract_geometry_nodes(self):
-        # Extract qgis nodes from qgis line
+        # Extract qgis nodes wkt from qgis line
         qgs_nodes = []
         if self.geometry.type() != QgsWkbTypes.LineGeometry:
             return False
@@ -72,7 +72,7 @@ class NewSegment:
             return False
         max_id = id_node_max
         nodes_bd = []
-        for node in nodes:
+        for node in nodes[1:]:  # Don't use first node, first node = existing node
             node_attributes = gen_attributes.copy()
             max_id += 1
             node_attributes["id"] = max_id
@@ -81,14 +81,26 @@ class NewSegment:
             nodes_bd.append(node_attributes)
         return nodes_bd  # List with all nodes attributes as dict
 
-    def create_way_nodes_bd(self, id_node_max, id_way):
+    def create_way_nodes_bd(self, id_node_max, id_way, connected_node_id):
         nodes = self.extract_geometry_nodes()
         if not nodes:
             return False
+
         way_nodes_bd = []
-        max_id = id_node_max
         seq = 0
-        for node in nodes:
+
+        # First node is existing node, get data from database
+        first_node = {
+            "way_id": id_way + 1,
+            "node_id": connected_node_id,
+            "sequence_id": seq
+        }
+        way_nodes_bd.append(first_node)
+
+        # Rest of nodes
+        max_id = id_node_max
+        seq += 1
+        for node in nodes[1:]:  # Don't use first node, first node = existing node
             node_attributes = {}
             node_attributes["way_id"] = id_way + 1
             max_id += 1
@@ -98,14 +110,19 @@ class NewSegment:
             way_nodes_bd.append(node_attributes)
         return way_nodes_bd
 
-    def create_ways_bd(self, id_node_max, id_way):
+    def create_ways_bd(self, id_node_max, id_way, connected_node_id):
+        # create list of nodes
         nodes = self.extract_geometry_nodes()
         if not nodes:
             return False
         num_nodes = len(nodes)
+        list_nodes = []
+        list_nodes.append(connected_node_id)
+        list_nodes.extend([i for i in range(id_node_max + 1, id_node_max + 1 + num_nodes - 1)])
+
         ways_bd = []
         attributes = self.create_gen_attributes()
-        attributes["nodes"] = [i for i in range(id_node_max + 1, id_node_max + 1 + num_nodes)]
+        attributes["nodes"] = list_nodes
         attributes["linestring"] = self.geometry.asWkt()
         attributes["tags"] = self.create_tags()
         bboxgeometry = QgsGeometry.fromRect(self.geometry.boundingBox())

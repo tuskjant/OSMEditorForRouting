@@ -885,15 +885,19 @@ class EditorForRouting:
         # get osrm_user from db
         user_in_db = get_osrm_user_from_db(cursor)
 
+        # get connected_node
+        qgs_coords = self.new_segment.geometry.asPolyline()
+        connected_node = get_connected_node(cursor,[qgs_coords[0].x(), qgs_coords[0].y()])
+
         # create nodes, ways,way_nodes and user data
         nodes_bd = self.new_segment.create_nodes_bd(max_node_id)
-        ways_bd = self.new_segment.create_ways_bd(max_node_id, max_way_id)
-        way_nodes_bd = self.new_segment.create_way_nodes_bd(max_node_id, max_way_id)
+        ways_bd = self.new_segment.create_ways_bd(max_node_id, max_way_id, connected_node)
+        way_nodes_bd = self.new_segment.create_way_nodes_bd(max_node_id, max_way_id, connected_node)
         if user_in_db == "nouser":    #add user to database in case it not exist
             user_bd = self.new_segment.create_user_bd()
         else:
             user_bd = None
-            
+
         if not nodes_bd or not ways_bd or not way_nodes_bd:
             return
 

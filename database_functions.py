@@ -181,6 +181,20 @@ def get_osrm_user_from_db(cursor):
         print(e)
         return False 
 
+def get_connected_node(cursor, point_x_y):
+    nodes_table = "nodes"
+    try:
+        query_user = f"SELECT id FROM {nodes_table} ORDER BY geom <-> ST_SetSRID(ST_MakePoint({point_x_y[0]},{point_x_y[1]}), 4326) LIMIT 1"
+        cursor.execute(query_user)
+        result = cursor.fetchone()
+        if result is None:
+            return False
+        node_id = result[0]
+    except Exception as e:
+        print(e)
+        return False 
+    return node_id
+
 def insert_data_into_table(conn, cursor, table_name, data_list):
     for data in data_list:
         columns = ', '.join(data.keys())
