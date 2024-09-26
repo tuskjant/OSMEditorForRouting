@@ -75,7 +75,6 @@ workspace "GIS Integral de Transport" {
 		routingeditorcomp -> wayfeaturehandler "Uses"
 		routingeditorcomp -> newsegmenthandler "Uses"
 		routingeditorcomp -> databasefunctions "Uses"
-		newsegmenthandler -> databasefunctions "Uses"
 		databasefunctions -> database "Reads from and writes to"
 		datahandler -> osmosis "Makes calls"
 		datahandler -> osrm "Makes calls"

@@ -1,6 +1,5 @@
 from datetime import datetime
 from qgis.core import QgsWkbTypes, QgsGeometry
-from .database_functions import *
 
 class NewSegment:
     def __init__(self, segment_layer):
