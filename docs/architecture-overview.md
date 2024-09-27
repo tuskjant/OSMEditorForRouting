@@ -45,5 +45,5 @@ OSM data in PBF format is loaded into the database using the Osmosis tool. The s
 <img src="/docs/diagrams/database/db_relations.PNG" alt="Esquema Osmosis de la base de datos" width="300"/>
 
 ## Technologies and Libraries Used
-The plugin is developed in Python using the PyQGIS library as the main framework. For the user interface, Qt Designer for QGIS has been used.
+The plugin is developed in Python using the PyQGIS library as the main framework. For the user interface, Qt Designer for QGIS has been used. The plugin [Plugin Builder](https://plugins.qgis.org/plugins/pluginbuilder/) has been used to create the initial plugin template.
 
