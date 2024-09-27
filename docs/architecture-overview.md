@@ -1,4 +1,5 @@
 # GIS Integral de Transport: Architecture Overview
+This repository it's one main part of the GIS Integral de Transport System: Here is hosted and described the GIS Integral de Transport Editor.
 
 ## 1.System Context 
 The GIS Integral Transport System is designed to provide route planning and network maintenance functionality for users. It consists of two main interacting systems: GIS Integral de Transport Viewer and GIS Integral de Transport Editor used by two user types.
