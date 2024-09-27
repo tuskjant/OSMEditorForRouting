@@ -6,7 +6,7 @@ Once the data has been edited, it is exported back to PBF format and converted i
 
 
 ## Usage
-See [user guide]() for instructions.
+See [user guide](/docs/usage.md) for instructions.
 
 ## Installation
 QGIS installation is required. QGIS minimum version: 3.0
