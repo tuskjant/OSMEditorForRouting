@@ -3,7 +3,7 @@
 ## 1.System Context 
 The GIS Integral Transport System is designed to provide route planning and network maintenance functionality for users. It consists of two main interacting systems: GIS Integral de Transport Viewer and GIS Integral de Transport Editor used by two user types.
 <!---![Context diagram](/docs/diagrams/c4/01_Context.png) --->
-<img src="/docs/diagrams/c4/01_Context.png" alt="Context diagram" width="200"/>
+<img src="/docs/diagrams/c4/01_Context.png" alt="Context diagram" width="300"/>
 
 ### Main Actors
 + **Route Planner:** A user who needs to find the optimal route between two or more locations.
@@ -17,7 +17,7 @@ The GIS Integral Transport System is designed to provide route planning and netw
 ## 2. GIS Integral de transport Editor: Container diagram 
 The Editor container provides functionality for editing the road network and handling OSM data, interfacing with the database and external tools like Osmosis and OSRM.
 <!---![Editor container diagram](/docs/diagrams/c4/02_ContainersEditor.png)--->
-<img src="/docs/diagrams/c4/02_ContainersEditor.png" alt="Editor container diagram" width="200"/>
+<img src="/docs/diagrams/c4/02_ContainersEditor.png" alt="Editor container diagram" width="300"/>
 
 + **QGIS Core:** The geographic information system aplication used for visualizing and editing the network data.
 + **OSRM Editor Plugin:** A custom QGIS plugin developed to allow the network modification: editing and adding new network segments. It handles OSM data processing and conversion for use with OSRM interacting with Osmosis utility and OSRM server.
@@ -27,7 +27,7 @@ The Editor container provides functionality for editing the road network and han
 ## 3. OSRM Editor Plugin: Components diagram
 The Editor plugin is composed of modular components that handle specific tasks. Each component is responsible for different aspects of the road network editing workflow, from data conversion to map updates.
 <!---![OSRM Editor Plugin component diagram](/docs/diagrams/c4/03_EditorComponents.png)--->
-<img src="/docs/diagrams/c4/03_EditorComponents.png" alt="OSRM Editor Plugin component diagram" width="200"/>
+<img src="/docs/diagrams/c4/03_EditorComponents.png" alt="OSRM Editor Plugin component diagram" width="300"/>
 
 + **UI Component:** The graphical user interface for the QGIS plugin. Created using Qt designer for QGIS.
 + **Data Handler:** Manages the import, export, and conversion of OSM data making calls to Osmosis utility and OSRM tools.
@@ -42,7 +42,7 @@ PostgreSQL has been used as the OSM data store for QGIS. The PostGIS extension i
 
 OSM data in PBF format is loaded into the database using the Osmosis tool. The schema created by Osmosis includes the tables "Ways," "Nodes," and "Way-Nodes," which are edited through the plugin.
 <!---![Esquema Osmosis de la base de datos](/docs/diagrams/database/db_relations.PNG)--->
-<img src="/docs/diagrams/database/db_relations.PNG" alt="Esquema Osmosis de la base de datos" widht="200"/>
+<img src="/docs/diagrams/database/db_relations.PNG" alt="Esquema Osmosis de la base de datos" width="300"/>
 
 ## Technologies and Libraries Used
 The plugin is developed in Python using the PyQGIS library as the main framework. For the user interface, Qt Designer for QGIS has been used.
